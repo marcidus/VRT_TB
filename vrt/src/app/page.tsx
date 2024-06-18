@@ -1,4 +1,7 @@
+import React from "react";
 import Image from "next/image";
+import GridLayoutComponent from "../../components/GridLayoutComponent";
+import ExampleComponent from "../../components/ExampleComponent";
 
 export default function Home() {
   return (
@@ -8,7 +11,7 @@ export default function Home() {
           Get started by editing&nbsp;
           <code className="font-mono font-bold">src/app/page.tsx</code>
         </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:size-auto lg:bg-none">
+        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
           <a
             className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
             href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
@@ -103,10 +106,15 @@ export default function Home() {
               -&gt;
             </span>
           </h2>
-          <p className="m-0 max-w-[30ch] text-balance text-sm opacity-50">
+          <p className="m-0 max-w-[30ch] text-sm opacity-50">
             Instantly deploy your Next.js site to a shareable URL with Vercel.
           </p>
         </a>
+      </div>
+
+      <div className="p-4">
+        <h1 className="text-2xl font-bold mb-4">Welcome to My Dashboard App</h1>
+        <a href="/dashboard" className="text-blue-500">Go to Dashboard</a>
       </div>
     </main>
   );
