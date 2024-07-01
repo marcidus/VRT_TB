@@ -12,7 +12,7 @@ const sendMessage = (message) => {
     if (err) {
       console.error('Error sending message:', err);
     } else {
-      console.log('Message sent:', message);
+      console.log('Message sent:', message.toString());
     }
   });
 };
@@ -21,8 +21,9 @@ const sendMessage = (message) => {
 fs.createReadStream('telemetry_data_20240609_163554.csv')
   .pipe(csv())
   .on('data', (row) => {
-    const message = JSON.stringify(row);
-    sendMessage(Buffer.from(message));
+    // Convert the row object to a buffer
+    const message = Buffer.from(Object.values(row).join(','));
+    sendMessage(message);
   })
   .on('end', () => {
     console.log('CSV file successfully processed');
