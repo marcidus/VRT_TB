@@ -1,13 +1,21 @@
 const Redis = require('ioredis');
+
+// Create a new Redis client instance
 const client = new Redis({
   host: '127.0.0.1',
   port: 6379
 });
 
+// Handle Redis client errors
 client.on('error', (err) => {
   console.error('Redis client error:', err);
 });
 
+/**
+ * Adds telemetry data to the Redis list.
+ *
+ * @param {Object} data - The telemetry data to add.
+ */
 const addTelemetryData = async (data) => {
   try {
     console.log('Attempting to add data to Redis:', data);
@@ -18,6 +26,11 @@ const addTelemetryData = async (data) => {
   }
 };
 
+/**
+ * Retrieves all telemetry data from the Redis list.
+ *
+ * @returns {Array<Object>} - An array of telemetry data objects.
+ */
 const getTelemetryData = async () => {
   try {
     console.log('Attempting to retrieve data from Redis');
