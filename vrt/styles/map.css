@@ -1,0 +1,7 @@
+.map {
+    width: 50vw;
+    height: 50vh;
+    border: 2px solid black;
+    border-radius: 50px;
+    background: linear-gradient(to bottom right, black, transparent);;
+}
