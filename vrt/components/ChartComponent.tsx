@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import { Line, Bar } from 'react-chartjs-2';
+import { ChartData } from './chartComponentTypes';
 
 // Register the necessary components
 ChartJS.register(
@@ -14,14 +15,14 @@ ChartJS.register(
   Legend
 );
 
-const data = {
-  labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+const initialData: ChartData = {
+  labels: [],
   datasets: [
     {
-      label: 'My First dataset',
+      label: 'Telemetry Data',
       backgroundColor: 'rgba(75,192,192,0.4)',
       borderColor: 'rgba(75,192,192,1)',
-      data: [65, 59, 80, 81, 56, 55, 40],
+      data: [],
     },
   ],
 };
@@ -32,8 +33,29 @@ interface ChartComponentProps {
 }
 
 const ChartComponent: React.FC<ChartComponentProps> = ({ dataType, chartType }) => {
-  // Use dataType as needed in your chart configuration
-  console.log("DataType: ", dataType); // Example usage
+  const [data, setData] = useState<ChartData>(initialData);
+
+  useEffect(() => {
+    const ws = new WebSocket('ws://localhost:3001');
+    ws.onmessage = (event) => {
+      const newData = JSON.parse(event.data);
+      if (newData.dataType === dataType) {
+        setData((prevData) => {
+          const updatedData = { ...prevData };
+          updatedData.labels.push(newData.timestamp);
+          updatedData.datasets[0].data.push(newData.value);
+
+          if (updatedData.labels.length > 10) {
+            updatedData.labels.shift();
+            updatedData.datasets[0].data.shift();
+          }
+
+          return updatedData;
+        });
+      }
+    };
+    return () => ws.close();
+  }, [dataType]);
 
   switch (chartType) {
     case 'LineChart':

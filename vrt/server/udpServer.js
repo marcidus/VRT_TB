@@ -2,6 +2,7 @@ const dgram = require('dgram');
 const fs = require('fs');
 const path = require('path');
 const { addBinaryTelemetryData } = require('./redisClient');
+const { sendUpdates } = require('./expressServer'); // Ensure this import is correct
 
 // IP address and port to bind the UDP server
 const UDP_IP = '0.0.0.0';
@@ -82,6 +83,9 @@ server.on('message', async (msg, rinfo) => {
 
     // Log the data added to Redis
     console.log(`Data added to Redis with timestamp: ${timestamp}`);
+
+    // Send updates to connected SSE clients
+    sendUpdates(messageObj);
   } catch (error) {
     // Log any errors that occur during message processing
     logError(rinfo, error.message, msg.toString('utf-8'));

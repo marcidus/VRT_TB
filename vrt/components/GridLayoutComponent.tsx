@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import GridLayout, { Layout } from 'react-grid-layout';
-import ChartComponent from "./ChartComponent";
+import LatestDataComponent from './LatestDataComponent';
 
 interface GridItem {
   i: string;
@@ -10,14 +10,13 @@ interface GridItem {
   h: number;
   title: string;
   dataType: string;
-  chartType: string;
 }
 
 const GridLayoutComponent: React.FC = () => {
   const [layout, setLayout] = useState<GridItem[]>([
-    { i: '1', x: 0, y: 0, w: 3, h: 2, title: 'MyTitle', dataType: 'data1', chartType: 'LineChart' },
-    { i: '2', x: 3, y: 0, w: 3, h: 2, title: 'Inverter', dataType: 'data2', chartType: 'BarChart' },
-    { i: '3', x: 6, y: 0, w: 3, h: 2, title: 'Race', dataType: 'data3', chartType: 'Map' },
+    { i: '1', x: 0, y: 0, w: 3, h: 2, title: 'Left Engine Temp', dataType: 'Left_Engine_Temp' },
+    { i: '2', x: 3, y: 0, w: 3, h: 2, title: 'Right Engine Temp', dataType: 'Right_Engine_Temp' },
+    { i: '3', x: 6, y: 0, w: 3, h: 2, title: 'Inverter', dataType: 'Left_Inverter_Temperature' },
   ]);
 
   return (
@@ -25,7 +24,7 @@ const GridLayoutComponent: React.FC = () => {
       {layout.map(item => (
         <div key={item.i} className="border rounded shadow p-2">
           <div className="text-center font-bold">{item.title}</div>
-          <ChartComponent dataType={item.dataType} chartType={item.chartType} />
+          <LatestDataComponent dataType={item.dataType} />
         </div>
       ))}
     </GridLayout>
