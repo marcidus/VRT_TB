@@ -1,9 +1,60 @@
 const dgram = require('dgram');
+const fs = require('fs');
+const path = require('path');
 const { addTelemetryData } = require('./redisClient');
 
 // IP address and port to bind the UDP server
 const UDP_IP = '0.0.0.0';
 const UDP_PORT = 7070;
+
+// In-memory error log buffer
+let errorLogBuffer = [];
+const ERROR_LOG_FILE = path.join(__dirname, 'udpServerErrors.log');
+
+/**
+ * Get high-precision current timestamp.
+ * @returns {string} - High-precision timestamp in ISO format with nanoseconds.
+ */
+const getHighPrecisionTimestamp = () => {
+  const now = new Date();
+  const [seconds, nanoseconds] = process.hrtime();
+  const milliseconds = now.getMilliseconds().toString().padStart(3, '0');
+  const nanos = nanoseconds.toString().padStart(9, '0');
+  return `${now.toISOString().slice(0, -1)}.${milliseconds}${nanos}Z`;
+};
+
+/**
+ * Logs an error message to the buffer.
+ * @param {Object} rinfo - Remote address information.
+ * @param {string} errorMessage - The error message to log.
+ * @param {string} rawMessage - The raw message received.
+ */
+const logError = (rinfo, errorMessage, rawMessage) => {
+  const logLine = `${getHighPrecisionTimestamp()} - Error processing message from ${rinfo.address}:${rinfo.port} - ${errorMessage} - Raw message: ${rawMessage}\n`;
+  errorLogBuffer.push(logLine);
+  // Flush the buffer if it reaches a certain size
+  if (errorLogBuffer.length >= 10) {
+    flushErrorLogBuffer();
+  }
+};
+
+/**
+ * Flushes the error log buffer to the file.
+ */
+const flushErrorLogBuffer = () => {
+  if (errorLogBuffer.length > 0) {
+    const logLines = errorLogBuffer.join('');
+    errorLogBuffer = [];
+    fs.appendFile(ERROR_LOG_FILE, logLines, (err) => {
+      if (err) {
+        console.error('Error logging messages:', err);
+      }
+    });
+  }
+};
+
+// Periodically flush the error log buffer
+setInterval(flushErrorLogBuffer, 5000);
 
 // Create a UDP server using IPv4
 const server = dgram.createSocket('udp4');
@@ -18,13 +69,21 @@ const server = dgram.createSocket('udp4');
 server.on('message', async (msg, rinfo) => {
   try {
     // Get the current timestamp in ISO format
-    const timestamp = new Date().toISOString();
+    const timestamp = getHighPrecisionTimestamp();
 
     // Convert the received message buffer to a string
-    const messageStr = msg.toString();
+    const messageStr = msg.toString('utf-8');
+
+    // Attempt to parse the message string as JSON
+    let jsonData;
+    try {
+      jsonData = JSON.parse(messageStr);
+    } catch (error) {
+      throw new Error('Received a corrupted JSON package, skipping...');
+    }
 
     // Create an object containing the raw message data and the timestamp
-    const messageObj = { rawData: messageStr, timestamp };
+    const messageObj = { ...jsonData, timestamp };
 
     // Log the received message
     console.log(`Received message: ${messageStr}`);
@@ -39,7 +98,7 @@ server.on('message', async (msg, rinfo) => {
     console.log(`Received message from ${rinfo.address}:${rinfo.port} - ${JSON.stringify(messageObj)}`);
   } catch (error) {
     // Log any errors that occur during message processing
-    console.error('Error processing message:', error);
+    logError(rinfo, error.message, msg.toString('utf-8'));
   }
 });
 
