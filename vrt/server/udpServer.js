@@ -1,7 +1,7 @@
 const dgram = require('dgram');
 const fs = require('fs');
 const path = require('path');
-const { addTelemetryData } = require('./redisClient');
+const { addBinaryTelemetryData } = require('./redisClient');
 
 // IP address and port to bind the UDP server
 const UDP_IP = '0.0.0.0';
@@ -71,31 +71,17 @@ server.on('message', async (msg, rinfo) => {
     // Get the current timestamp in ISO format
     const timestamp = getHighPrecisionTimestamp();
 
-    // Convert the received message buffer to a string
-    const messageStr = msg.toString('utf-8');
-
-    // Attempt to parse the message string as JSON
-    let jsonData;
-    try {
-      jsonData = JSON.parse(messageStr);
-    } catch (error) {
-      throw new Error('Received a corrupted JSON package, skipping...');
-    }
-
-    // Create an object containing the raw message data and the timestamp
-    const messageObj = { ...jsonData, timestamp };
+    // Create an object containing the binary data and the timestamp
+    const messageObj = { data: msg, timestamp };
 
     // Log the received message
-    console.log(`Received message: ${messageStr}`);
+    console.log(`Received message from ${rinfo.address}:${rinfo.port}`);
 
     // Add the telemetry data to Redis
-    await addTelemetryData(messageObj);
+    await addBinaryTelemetryData(messageObj);
 
     // Log the data added to Redis
-    console.log(`Data added to Redis: ${JSON.stringify(messageObj)}`);
-
-    // Log the sender's address and port along with the message object
-    console.log(`Received message from ${rinfo.address}:${rinfo.port} - ${JSON.stringify(messageObj)}`);
+    console.log(`Data added to Redis with timestamp: ${timestamp}`);
   } catch (error) {
     // Log any errors that occur during message processing
     logError(rinfo, error.message, msg.toString('utf-8'));

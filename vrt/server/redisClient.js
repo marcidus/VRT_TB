@@ -12,38 +12,38 @@ client.on('error', (err) => {
 });
 
 /**
- * Adds telemetry data to the Redis list.
+ * Adds binary telemetry data to the Redis list.
  *
  * @param {Object} data - The telemetry data to add.
  */
-const addTelemetryData = async (data) => {
+const addBinaryTelemetryData = async (data) => {
   try {
-    console.log('Attempting to add data to Redis:', data);
-    await client.lpush('telemetry_data', JSON.stringify(data));
-    console.log('Successfully added data to Redis:', data);
+    console.log('Attempting to add binary data to Redis');
+    await client.lpush('binary_telemetry_data', JSON.stringify(data));
+    console.log('Successfully added binary data to Redis');
   } catch (error) {
-    console.error('Error adding data to Redis:', error);
+    console.error('Error adding binary data to Redis:', error);
   }
 };
 
 /**
- * Retrieves all telemetry data from the Redis list.
+ * Retrieves all binary telemetry data from the Redis list.
  *
- * @returns {Array<Object>} - An array of telemetry data objects.
+ * @returns {Array<Object>} - An array of binary telemetry data objects.
  */
-const getTelemetryData = async () => {
+const getBinaryTelemetryData = async () => {
   try {
-    console.log('Attempting to retrieve data from Redis');
-    const data = await client.lrange('telemetry_data', 0, -1);
-    console.log('Data retrieved from Redis:', data);
+    console.log('Attempting to retrieve binary data from Redis');
+    const data = await client.lrange('binary_telemetry_data', 0, -1);
+    console.log('Binary data retrieved from Redis');
     return data.map(item => JSON.parse(item));
   } catch (error) {
-    console.error('Error retrieving data from Redis:', error);
+    console.error('Error retrieving binary data from Redis:', error);
     return [];
   }
 };
 
 module.exports = {
-  addTelemetryData,
-  getTelemetryData
+  addBinaryTelemetryData,
+  getBinaryTelemetryData
 };
