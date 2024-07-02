@@ -4,6 +4,8 @@ const { getBinaryTelemetryData } = require('./redisClient');
 const app = express();
 const port = 3000;
 
+let telemetryDataMap = {};
+
 /**
  * Health check endpoint to verify the server is running.
  */
@@ -20,15 +22,23 @@ app.get('/telemetry', async (req, res) => {
     console.log("Attempting to retrieve telemetry data from Redis");
     const data = await getBinaryTelemetryData();
     
-    // Decode and parse the binary data
-    const parsedData = data.map(item => {
-      const binaryData = Buffer.from(item.data.data); // Convert the stored data back to Buffer
+    // Decode and parse the binary data, accumulating in a map
+    data.forEach(item => {
+      const binaryData = Buffer.from(item.data, 'base64'); // Convert the stored data back to Buffer
       const decodedData = binaryData.toString('utf-8'); // Decode the binary data to a UTF-8 string
-      return JSON.parse(decodedData); // Parse the string as JSON
+      const jsonData = JSON.parse(decodedData); // Parse the string as JSON
+      
+      // Accumulate data into the telemetryDataMap
+      for (const key in jsonData) {
+        if (!telemetryDataMap[key]) {
+          telemetryDataMap[key] = [];
+        }
+        telemetryDataMap[key].push({ timestamp: item.timestamp, value: jsonData[key] });
+      }
     });
 
-    console.log("Data retrieved from Redis:", parsedData.length, "records found");
-    res.json(parsedData);
+    console.log("Data retrieved and mapped from Redis:", Object.keys(telemetryDataMap).length, "categories found");
+    res.json(telemetryDataMap);
   } catch (error) {
     console.error("Error retrieving telemetry data:", error);
     res.status(500).send("Internal Server Error");

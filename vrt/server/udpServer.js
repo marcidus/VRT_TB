@@ -72,7 +72,7 @@ server.on('message', async (msg, rinfo) => {
     const timestamp = getHighPrecisionTimestamp();
 
     // Create an object containing the binary data and the timestamp
-    const messageObj = { data: msg, timestamp };
+    const messageObj = { data: msg.toString('base64'), timestamp };
 
     // Log the received message
     console.log(`Received message from ${rinfo.address}:${rinfo.port}`);
