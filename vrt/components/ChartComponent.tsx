@@ -12,6 +12,11 @@ interface ChartComponentProps {
 
 const initialData: ChartDataPoint[] = [];
 
+/**
+ * Truncate the fractional part of the timestamp to 3 decimal places.
+ * @param timestamp - The original timestamp string.
+ * @returns The truncated timestamp string.
+ */
 const truncateTimestamp = (timestamp: string): string => {
   try {
     const [datePart, fractionalPart] = timestamp.split('.');
@@ -31,6 +36,8 @@ const ChartComponent: React.FC<ChartComponentProps> = ({ dataType }) => {
 
   useEffect(() => {
     const eventSource = new EventSource('http://localhost:3001/events');
+
+    // Handle incoming SSE messages
     eventSource.onmessage = (event) => {
       try {
         console.log('SSE message received:', event.data);
@@ -69,10 +76,12 @@ const ChartComponent: React.FC<ChartComponentProps> = ({ dataType }) => {
       }
     };
 
+    // Handle SSE errors
     eventSource.onerror = (error) => {
       console.error('SSE error:', error);
     };
 
+    // Clean up the event source on component unmount
     return () => eventSource.close();
   }, [dataType]);
 
