@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react';
 import "leaflet/dist/leaflet.css";
 import "leaflet-defaulticon-compatibility"
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css"
-import { MapContainer, TileLayer, useMap, Polyline } from 'react-leaflet'
+import { MapContainer, TileLayer, useMap, Polyline, Marker } from 'react-leaflet'
 import "../styles/map.css"
 import L from 'leaflet'
 
@@ -23,6 +23,7 @@ export default function MapComponent(props: any) {
         return null;
     };
 
+    //Temporary function to handle file upload
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
   const file = event.target.files ? event.target.files[0] : null;
   if (!file) return;
@@ -51,7 +52,46 @@ export default function MapComponent(props: any) {
   };
   reader.readAsText(file);
 };
+
+// Websocket connection to update the marker position
+const [markerPosition, setMarkerPosition] = useState<L.LatLng>(L.latLng(46.174764452886265, 7.223735237766073));
+
+useEffect(() => {
+  const ws = new WebSocket('ws://localhost:8080');
+
+  ws.onmessage = (event) => {
+    try {
+      // Parse the JSON message
+      const data = JSON.parse(event.data);
       
+      // Find a property name containing "GPS"
+      const gpsKey = Object.keys(data).find(key => key.includes("GPS"));
+      
+      if (gpsKey) {
+        // Extract latitude and longitude from the found GPS property
+        const [latStr, lonStr] = data[gpsKey].split(' ');
+        const lat = parseFloat(latStr);
+        const lon = parseFloat(lonStr);
+        
+        // Validate the extracted latitude and longitude
+        if (!isNaN(lat) && !isNaN(lon)) {
+          // Update the marker position with valid lat and lon
+          setMarkerPosition({ lat, lon }); // Adjust this to your actual method for updating the marker
+        } else {
+          console.error('Invalid latitude or longitude values:', latStr, lonStr);
+        }
+      } else {
+        console.error('No property containing "GPS" found in the message:', data);
+      }
+    } catch (error) {
+      console.error('Error parsing WebSocket message:', error);
+    }
+  };
+
+  return () => {
+    ws.close();
+  };
+}, []);
     
 
     return (
@@ -63,8 +103,9 @@ export default function MapComponent(props: any) {
           />
             {polylinePoints.length > 0 && <Polyline positions={polylinePoints}  />}
             {polylinePoints.length > 0 && <RecenterMap points={polylinePoints} />}
+            <Marker position={markerPosition}  />
         </MapContainer>
         <input type="file" onChange={handleFileUpload} accept=".csv" />
-      </div>
-    );
+      </div>    );
+
   }
