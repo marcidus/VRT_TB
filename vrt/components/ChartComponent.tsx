@@ -8,6 +8,9 @@ interface ChartDataPoint {
 
 interface ChartComponentProps {
   dataType: string;
+  title: string;
+  onDataTypeChange: (newDataType: string) => void;
+  availableDataTypes: string[];
 }
 
 const initialData: ChartDataPoint[] = [];
@@ -31,10 +34,13 @@ const truncateTimestamp = (timestamp: string): string => {
   }
 };
 
-const ChartComponent: React.FC<ChartComponentProps> = ({ dataType }) => {
+const ChartComponent: React.FC<ChartComponentProps> = ({ dataType, title, onDataTypeChange, availableDataTypes }) => {
   const [data, setData] = useState<ChartDataPoint[]>(initialData);
 
   useEffect(() => {
+    // Clear the previous data when the data type changes
+    setData(initialData);
+
     const eventSource = new EventSource('http://localhost:3001/events');
 
     // Handle incoming SSE messages
@@ -51,7 +57,7 @@ const ChartComponent: React.FC<ChartComponentProps> = ({ dataType }) => {
           const truncatedTimestamp = truncateTimestamp(newData.timestamp);
           if (isNaN(Date.parse(truncatedTimestamp))) {
             console.error('Invalid truncated timestamp:', truncatedTimestamp);
-            return; // Exit early if the truncated timestamp is invalid
+            return;
           }
 
           const newValue = parseFloat(parsedData[dataType]);
@@ -76,12 +82,10 @@ const ChartComponent: React.FC<ChartComponentProps> = ({ dataType }) => {
       }
     };
 
-    // Handle SSE errors
     eventSource.onerror = (error) => {
       console.error('SSE error:', error);
     };
 
-    // Clean up the event source on component unmount
     return () => eventSource.close();
   }, [dataType]);
 
@@ -90,16 +94,26 @@ const ChartComponent: React.FC<ChartComponentProps> = ({ dataType }) => {
   }, [data]);
 
   return (
-    <ResponsiveContainer width="100%" height={400}>
-      <LineChart data={data}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="x" />
-        <YAxis domain={[0, 100]} />
-        <Tooltip />
-        <Legend />
-        <Line type="monotone" dataKey="y" stroke="#8884d8" activeDot={{ r: 8 }} />
-      </LineChart>
-    </ResponsiveContainer>
+    <div>
+      <h2>{title}</h2>
+      <select value={dataType} onChange={(e) => onDataTypeChange(e.target.value)}>
+        {availableDataTypes.map((type) => (
+          <option key={type} value={type}>
+            {type}
+          </option>
+        ))}
+      </select>
+      <ResponsiveContainer width="100%" height={400}>
+        <LineChart data={data}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="x" />
+          <YAxis domain={[0, 100]} />
+          <Tooltip />
+          <Legend />
+          <Line type="monotone" dataKey="y" stroke="#8884d8" activeDot={{ r: 8 }} />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
   );
 };
 

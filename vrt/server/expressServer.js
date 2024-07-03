@@ -12,6 +12,22 @@ let telemetryDataMap = {};
 let clients = [];
 
 // Use CORS middleware to enable cross-origin requests
+app.use(cors({
+  origin: 'http://localhost:3000' // Update this to match your frontend URL
+}));
+
+app.get('/data-types', (req, res) => {
+  try {
+    const headers = loadHeaders();
+    res.json(headers);
+  } catch (error) {
+    console.error("Error fetching data types:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+
+// Use CORS middleware to enable cross-origin requests
 app.use(cors());
 
 // Serve static files from the 'public' directory
