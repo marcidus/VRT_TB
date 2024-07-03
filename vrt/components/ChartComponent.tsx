@@ -1,52 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, TimeScale } from 'chart.js';
-import { Line } from 'react-chartjs-2';
-import 'chartjs-adapter-date-fns';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-// Register necessary components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  TimeScale
-);
-
-interface ChartData {
-  labels: string[];
-  datasets: {
-    label: string;
-    backgroundColor: string;
-    borderColor: string;
-    data: { x: string, y: number }[];
-  }[];
+interface ChartDataPoint {
+  x: string;
+  y: number;
 }
 
 interface ChartComponentProps {
   dataType: string;
 }
 
-const initialData: ChartData = {
-  labels: [],
-  datasets: [
-    {
-      label: 'Telemetry Data',
-      backgroundColor: 'rgba(75,192,192,0.4)',
-      borderColor: 'rgba(75,192,192,1)',
-      data: [],
-    },
-  ],
-};
+const initialData: ChartDataPoint[] = [];
 
 const truncateTimestamp = (timestamp: string): string => {
   try {
-    // Split the timestamp into date part and fractional seconds part
     const [datePart, fractionalPart] = timestamp.split('.');
     if (fractionalPart) {
-      // Truncate the fractional part to three decimal places
       const truncatedFractionalPart = fractionalPart.slice(0, 3);
       return `${datePart}.${truncatedFractionalPart}Z`;
     }
@@ -58,7 +27,7 @@ const truncateTimestamp = (timestamp: string): string => {
 };
 
 const ChartComponent: React.FC<ChartComponentProps> = ({ dataType }) => {
-  const [data, setData] = useState<ChartData>(initialData);
+  const [data, setData] = useState<ChartDataPoint[]>(initialData);
 
   useEffect(() => {
     const eventSource = new EventSource('http://localhost:3001/events');
@@ -82,16 +51,10 @@ const ChartComponent: React.FC<ChartComponentProps> = ({ dataType }) => {
           console.log(`newValue for ${dataType}:`, newValue);
 
           setData((prevData) => {
-            const updatedData = { ...prevData };
-            updatedData.labels = [...prevData.labels, truncatedTimestamp];
-            updatedData.datasets[0].data = [
-              ...prevData.datasets[0].data,
-              { x: truncatedTimestamp, y: newValue }
-            ];
+            const updatedData = [...prevData, { x: truncatedTimestamp, y: newValue }];
 
-            if (updatedData.labels.length > 10) {
-              updatedData.labels.shift();
-              updatedData.datasets[0].data.shift();
+            if (updatedData.length > 10) {
+              updatedData.shift();
             }
 
             console.log('Updated data:', updatedData);
@@ -113,37 +76,21 @@ const ChartComponent: React.FC<ChartComponentProps> = ({ dataType }) => {
     return () => eventSource.close();
   }, [dataType]);
 
-  const options: any = {
-    maintainAspectRatio: false,
-    scales: {
-      x: {
-        type: 'time',
-        time: {
-          unit: 'second',
-          displayFormats: {
-            second: 'HH:mm:ss',
-          },
-          title: {
-            display: true,
-            text: 'Timestamp',
-          },
-        },
-      },
-      y: {
-        beginAtZero: true,
-        max: 100, // Set the y-axis maximum value to 100
-        title: {
-          display: true,
-          text: dataType.replace(/_/g, ' '),
-        },
-      },
-    },
-  };
+  useEffect(() => {
+    console.log('Current data for chart:', JSON.stringify(data, null, 2));
+  }, [data]);
 
   return (
-    <div style={{ height: '100%', width: '100%' }}>
-      <Line data={data} options={options} />
-    </div>
+    <ResponsiveContainer width="100%" height={400}>
+      <LineChart data={data}>
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis dataKey="x" />
+        <YAxis domain={[0, 100]} />
+        <Tooltip />
+        <Legend />
+        <Line type="monotone" dataKey="y" stroke="#8884d8" activeDot={{ r: 8 }} />
+      </LineChart>
+    </ResponsiveContainer>
   );
 };
 
