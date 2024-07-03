@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const { addBinaryTelemetryData } = require('./redisClient');
 const { sendUpdates } = require('./expressServer'); // Ensure this import is correct
+const { addHeader, removeHeader, loadHeaders } = require('./headerManager'); // Import headerManager functions
 
 // IP address and port to bind the UDP server
 const UDP_IP = '0.0.0.0';
@@ -11,6 +12,9 @@ const UDP_PORT = 7070;
 // In-memory error log buffer
 let errorLogBuffer = [];
 const ERROR_LOG_FILE = path.join(__dirname, 'udpServerErrors.log');
+
+// Flag to track if headers have been updated
+let headersUpdated = false;
 
 /**
  * Get high-precision current timestamp.
@@ -83,6 +87,28 @@ server.on('message', async (msg, rinfo) => {
 
     // Log the data added to Redis
     console.log(`Data added to Redis with timestamp: ${timestamp}`);
+
+    // Parse the telemetry data to JSON
+    const decodedData = Buffer.from(messageObj.data, 'base64').toString('utf-8');
+    const jsonData = JSON.parse(decodedData);
+
+    // Log the parsed telemetry data
+    console.log(`Parsed telemetry data: ${JSON.stringify(jsonData)}`);
+
+    // Update headers based on the telemetry data if not already updated
+    if (!headersUpdated) {
+      const existingHeaders = loadHeaders();
+      const newHeaders = Object.keys(jsonData).filter(header => !existingHeaders.includes(header));
+      const removedHeaders = existingHeaders.filter(header => !Object.keys(jsonData).includes(header));
+
+      console.log(`New headers to add: ${newHeaders}`);
+      console.log(`Headers to remove: ${removedHeaders}`);
+
+      newHeaders.forEach(addHeader);
+      removedHeaders.forEach(removeHeader);
+
+      headersUpdated = true; // Set flag to true to prevent further updates
+    }
 
     // Send updates to connected SSE clients
     sendUpdates(messageObj);

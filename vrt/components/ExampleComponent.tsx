@@ -6,7 +6,7 @@ const ExampleComponent: React.FC = () => {
     gsap.to('.animate-me', { x: 100, duration: 1 });
   }, []);
 
-  return <div className="animate-me">Animate Me</div>;
+  return <div className="animate-me"></div>;
 };
 
 export default ExampleComponent;
