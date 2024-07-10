@@ -1,7 +1,77 @@
 .map {
-    width: 50vw;
-    height: 50vh;
-    border: 2px solid black;
-    border-radius: 50px;
-    background: linear-gradient(to bottom right, black, transparent);;
+  width: 600px;
+  height: 400px;
+  border: 2px solid black;
+  border-radius: 25px;
+  background: transparent;
+}
+
+.mapDiv {
+  width: 600px;
+  height: 400px;
+  border-radius: 25px;
+  background: transparent;
+}
+
+
+.popup-content {
+  margin: auto;
+  background: rgb(255, 255, 255);
+  width: 50%;
+  padding: 5px;
+  border-radius: 25px;
+}
+
+.popup-arrow {
+  color: rgb(255, 255, 255);
+}
+
+[role='tooltip'].popup-content {
+  width: 200px;
+  box-shadow: rgba(0, 0, 0, 0.16) 0px 0px 3px;
+}
+
+.popup-overlay {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+[data-popup='tooltip'].popup-overlay {
+  background: transparent;
+}
+
+.leaflet-bottom {
+  display: none;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Koulen&family=Lato&family=Nunito&family=Playfair+Display:ital@1&family=Prata&family=Raleway:ital,wght@1,100&family=Roboto&family=Roboto+Condensed&family=Teko&display=swap');
+
+.btn {
+  margin: 10px;
+  font-family: Roboto, sans-serif;
+  font-weight: 0;
+  font-size: 14px;
+  color: #fff;
+  background: linear-gradient(90deg, #787878 0%, #000000 100%);
+  padding: 15px 15px;
+  border: none;
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 12px 28px 0px, rgba(0, 0, 0, 0.1) 0px 2px 4px 0px, rgba(255, 255, 255, 0.05) 0px 0px 0px 1px inset;
+  border-radius: 50px;
+  transition: 0ms;
+  transform: translateY(0);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  cursor: pointer;
+}
+
+.btn:hover {
+
+  background: linear-gradient(90deg, #787878 0%, #000000 100%);
+  color: #d9d9d9;
+  border: none;
+}
+
+.h2 {
+  font-family: Roboto, sans-serif;
+  font-weight: 0;
 }
