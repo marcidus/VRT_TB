@@ -59,7 +59,7 @@ export default function MapComponent(props: any) {
       }).filter(point => point !== null); // Filter out any null values resulting from missing/malformed GPS data
 
 
-      setPolylinePoints(points! as L.LatLng[]);
+      setPolylinePoints(points);
     };
     reader.readAsText(file);
   };
@@ -86,18 +86,14 @@ export default function MapComponent(props: any) {
 
           // Validate the extracted latitude and longitude
           if (!isNaN(lat) && !isNaN(lon) && lat !== 0 && lon !== 0) {
-            // Update the marker position with valid lat and lon
-            setMarkerPosition(L.latLng(lat, lon)); // Adjust this to your actual method for updating the marker
-            //add to polylinepoints list
-            if (polylinePoints.length == 0) {
-              //setPolylinePoints([L.latLng(lat, lon)]);
-              polylinePoints.push(L.latLng(lat, lon));
-            }
-            else {
-              //setPolylinePoints([...polylinePoints, L.latLng(lat, lon)]);
-              polylinePoints.push(L.latLng(lat, lon));
-              console.log("add point to position ", lat, lon)
-            }
+            setPolylinePoints(prevPoints => {
+              if(prevPoints.length === 0) {
+                return [L.latLng(lat, lon)];
+              }
+              return [...prevPoints, L.latLng(lat, lon)];
+            });
+            setMarkerPosition(L.latLng(lat, lon));
+            console.log(`Latitude: ${lat}, Longitude: ${lon}, pushed`);
           } else {
             console.error('Invalid latitude or longitude values:', latStr, lonStr);
           }
@@ -181,7 +177,7 @@ export default function MapComponent(props: any) {
     const file = event.target.files[0];
     const reader = new FileReader();
 
-    reader.onload = function(event) {
+    reader.onload = function (event) {
       const jsonContent = JSON.parse(event.target.result);
       const southWest = L.latLng(jsonContent._southWest.lat, jsonContent._southWest.lng);
       const northEast = L.latLng(jsonContent._northEast.lat, jsonContent._northEast.lng);
@@ -221,6 +217,7 @@ export default function MapComponent(props: any) {
   const resetMap = () => {
     setPolylinePoints([]);
     setImageUrl(null)
+    setMarkerPosition(L.latLng(0,0))
   }
 
   return (
@@ -229,11 +226,11 @@ export default function MapComponent(props: any) {
       backgroundSize: 'cover', // Ensure the image covers the div
       backgroundPosition: 'center' // Center the background image
     }}>
-      <MapContainer id='map' center={center} zoom={19} scrollWheelZoom={false} className='map'>
-      {imageUrl == null && (
+      <MapContainer id='map' center={center} zoom={19} scrollWheelZoom={false} className='map' zoomDelta={0.25} zoomSnap={0}>
+        {imageUrl == null && (
           <TileLayer url='https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}' />
         )}
-        {polylinePoints.length > 0 && <Polyline positions={polylinePoints} />}
+        <Polyline positions={polylinePoints} />
         <Marker position={markerPosition} />
         <GetBounds bool={boolBounds} />
         <SetBounds bounds={mapBounds} />
