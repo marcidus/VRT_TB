@@ -1,5 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import React from 'react';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer
+} from 'recharts';
 
 interface ChartDataPoint {
   x: string;
@@ -7,113 +16,23 @@ interface ChartDataPoint {
 }
 
 interface ChartComponentProps {
-  dataType: string;
-  title: string;
-  onDataTypeChange: (newDataType: string) => void;
-  availableDataTypes: string[];
+  displayData: ChartDataPoint[];
+  yAxisRange: { min: number, max: number };
 }
 
-const initialData: ChartDataPoint[] = [];
-
-/**
- * Truncate the fractional part of the timestamp to 3 decimal places.
- * @param timestamp - The original timestamp string.
- * @returns The truncated timestamp string.
- */
-const truncateTimestamp = (timestamp: string): string => {
-  try {
-    const [datePart, fractionalPart] = timestamp.split('.');
-    if (fractionalPart) {
-      const truncatedFractionalPart = fractionalPart.slice(0, 3);
-      return `${datePart}.${truncatedFractionalPart}Z`;
-    }
-    return timestamp;
-  } catch (error) {
-    console.error('Error truncating timestamp:', error);
-    return timestamp;
-  }
-};
-
-const ChartComponent: React.FC<ChartComponentProps> = ({ dataType, title, onDataTypeChange, availableDataTypes }) => {
-  const [data, setData] = useState<ChartDataPoint[]>(initialData);
-
-  useEffect(() => {
-    // Clear the previous data when the data type changes
-    setData(initialData);
-
-    const eventSource = new EventSource('http://localhost:3001/events');
-
-    // Handle incoming SSE messages
-    eventSource.onmessage = (event) => {
-      try {
-        console.log('SSE message received:', event.data);
-        const newData = JSON.parse(event.data);
-        const decodedData = atob(newData.data);
-        const parsedData = JSON.parse(decodedData);
-
-        console.log('Parsed data:', parsedData);
-
-        if (parsedData[dataType] !== undefined) {
-          const truncatedTimestamp = truncateTimestamp(newData.timestamp);
-          if (isNaN(Date.parse(truncatedTimestamp))) {
-            console.error('Invalid truncated timestamp:', truncatedTimestamp);
-            return;
-          }
-
-          const newValue = parseFloat(parsedData[dataType]);
-          console.log(`newValue for ${dataType}:`, newValue);
-
-          setData((prevData) => {
-            const updatedData = [...prevData, { x: truncatedTimestamp, y: newValue }];
-
-            if (updatedData.length > 10) {
-              updatedData.shift();
-            }
-
-            console.log('Updated data:', updatedData);
-
-            return updatedData;
-          });
-        } else {
-          console.error(`Data type ${dataType} not found in parsed data`);
-        }
-      } catch (error) {
-        console.error('Error processing SSE message:', error);
-      }
-    };
-
-    eventSource.onerror = (error) => {
-      console.error('SSE error:', error);
-    };
-
-    return () => eventSource.close();
-  }, [dataType]);
-
-  useEffect(() => {
-    console.log('Current data for chart:', JSON.stringify(data, null, 2));
-  }, [data]);
-
+const ChartComponent: React.FC<ChartComponentProps> = ({ displayData, yAxisRange }) => {
+  console.log('Rendering Chart with data:', displayData);
   return (
-    <div>
-      <h2>{title}</h2>
-      <select value={dataType} onChange={(e) => onDataTypeChange(e.target.value)}>
-        {availableDataTypes.map((type) => (
-          <option key={type} value={type}>
-            {type}
-          </option>
-        ))}
-      </select>
-      <ResponsiveContainer width="100%" height={400}>
-        <LineChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="x" />
-          <YAxis domain={[0, 100]} />
-          <Tooltip />
-          <Legend />
-          <Line type="monotone" dataKey="y" stroke="#8884d8" activeDot={{ r: 8 }} />
-        </LineChart>
-      </ResponsiveContainer>
-    </div>
+    <ResponsiveContainer width="100%" height={400}>
+      <LineChart data={displayData}>
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis dataKey="x" />
+        <YAxis domain={[yAxisRange.min, yAxisRange.max]} tickFormatter={(value) => Math.round(value)} />
+        <Tooltip />
+        <Legend />
+        <Line type="monotone" dataKey="y" stroke="#8884d8" activeDot={{ r: 8 }} />
+      </LineChart>
+    </ResponsiveContainer>
   );
 };
 

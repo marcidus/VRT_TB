@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import GridLayout from 'react-grid-layout';
-import ChartComponent from './ChartComponent';
+import ChartContainer from './ChartContainer';
 
 interface GridItem {
   i: string;
@@ -33,16 +32,16 @@ const GridLayoutComponent: React.FC = () => {
     newLayout[index] = {
       ...newLayout[index],
       dataType: newDataType,
-      title: newDataType.replace(/_/g, ' '), // Update the title to match the new data type
+      title: newDataType.replace(/_/g, ' '),
     };
     setLayout(newLayout);
   };
 
   return (
-    <GridLayout className="layout" layout={layout} cols={12} rowHeight={100} width={1200}>
+    <div className="layout">
       {layout.map((item, index) => (
-        <div key={item.i} className="border rounded shadow p-2" style={{ height: '100%' }}>
-          <ChartComponent
+        <div key={item.i} className="border rounded shadow p-2">
+          <ChartContainer
             dataType={item.dataType}
             title={item.title}
             onDataTypeChange={(newDataType) => handleDataTypeChange(index, newDataType)}
@@ -50,7 +49,7 @@ const GridLayoutComponent: React.FC = () => {
           />
         </div>
       ))}
-    </GridLayout>
+    </div>
   );
 };
 

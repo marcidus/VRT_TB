@@ -46,7 +46,7 @@ const sendTelemetryData = () => {
 };
 
 // Send telemetry data every second
-setInterval(sendTelemetryData, 1000);
+setInterval(sendTelemetryData, 100);
 
 // Close the client after a certain period (e.g., 30 seconds)
 setTimeout(() => {
