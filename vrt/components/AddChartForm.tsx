@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 
 interface AddChartFormProps {
   availableDataTypes: string[];
-  onAddChart: (title: string, dataType: string, chartType: string) => void; // Ajoutez chartType ici
+  onAddChart: (title: string, dataType: string, chartType: 'line' | 'bar' | 'car') => void;
 }
 
 const AddChartForm: React.FC<AddChartFormProps> = ({ availableDataTypes, onAddChart }) => {
   const [title, setTitle] = useState('');
   const [dataType, setDataType] = useState(availableDataTypes[0] || '');
-  const [chartType, setChartType] = useState('line'); // Par défaut, le type de graphique est 'line'
+  const [chartType, setChartType] = useState<'line' | 'bar' | 'car'>('line');
 
   useEffect(() => {
     if (availableDataTypes.length > 0 && !dataType) {
@@ -18,10 +18,10 @@ const AddChartForm: React.FC<AddChartFormProps> = ({ availableDataTypes, onAddCh
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onAddChart(title, dataType, chartType); // Passez chartType ici
+    onAddChart(title, dataType, chartType);
     setTitle('');
-    setDataType(availableDataTypes[0] || '');
-    setChartType('line'); // Réinitialisez à 'line' après soumission
+    setDataType(availableDataTypes[0] || ''); // Reset data type to the first available option
+    setChartType('line'); // Reset chart type to default
   };
 
   return (
@@ -34,6 +34,7 @@ const AddChartForm: React.FC<AddChartFormProps> = ({ availableDataTypes, onAddCh
           onChange={(e) => setTitle(e.target.value)}
           className="border rounded p-1"
           required
+          disabled={chartType === 'car'} // Disable title input for car data display
         />
       </div>
       <div className="mb-2">
@@ -43,6 +44,7 @@ const AddChartForm: React.FC<AddChartFormProps> = ({ availableDataTypes, onAddCh
           onChange={(e) => setDataType(e.target.value)}
           className="border rounded p-1"
           required
+          disabled={chartType === 'car'} // Disable data type input for car data display
         >
           {availableDataTypes.map((type) => (
             <option key={type} value={type}>
@@ -55,13 +57,13 @@ const AddChartForm: React.FC<AddChartFormProps> = ({ availableDataTypes, onAddCh
         <label className="mr-2">Chart Type:</label>
         <select
           value={chartType}
-          onChange={(e) => setChartType(e.target.value)}
+          onChange={(e) => setChartType(e.target.value as 'line' | 'bar' | 'car')}
           className="border rounded p-1"
           required
         >
           <option value="line">Line Chart</option>
           <option value="bar">Bar Chart</option>
-          <option value="pie">Pie Chart</option>
+          <option value="car">Car Data Display</option>
         </select>
       </div>
       <button type="submit" className="bg-blue-500 text-white rounded px-4 py-2">

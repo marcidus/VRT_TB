@@ -1,10 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from './Header';
 import ChartComponent from './ChartComponent';
 import YAxisRangeComponent from './YAxisRangeComponent';
-import Draggable from 'react-draggable';
-import { Resizable } from "react-resizable";
-import 'react-resizable/css/styles.css';
 
 interface ChartDataPoint {
   x: string;
@@ -16,7 +13,7 @@ interface ChartContainerProps {
   title: string;
   onDataTypeChange: (newDataType: string) => void;
   availableDataTypes: string[];
-  onDelete: () => void; // Add this prop for deletion
+  onDelete: () => void;
 }
 
 const initialData: ChartDataPoint[] = [];
@@ -40,15 +37,12 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
   title,
   onDataTypeChange,
   availableDataTypes,
-  onDelete // Add this prop for deletion
+  onDelete,
 }) => {
   const [data, setData] = useState<ChartDataPoint[]>(initialData);
   const [displayData, setDisplayData] = useState<ChartDataPoint[]>(initialData);
   const [dataPoints, setDataPoints] = useState<number>(10);
-  const [width, setWidth] = useState<number>(400);
-  const [height, setHeight] = useState<number>(400);
-  const [yAxisRange, setYAxisRange] = useState<{ min: number, max: number }>({ min: 0, max: 100 });
-  const [dataTypes, setDataTypes] = useState<string[]>(availableDataTypes);
+  const [yAxisRange, setYAxisRange] = useState<{ min: number; max: number }>({ min: 0, max: 100 });
 
   useEffect(() => {
     setData(initialData);
@@ -95,62 +89,36 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
     setDisplayData(data.slice(-dataPoints));
   }, [data, dataPoints]);
 
-  const handleRangeChange = (filteredData: { x: string, y: number }[], min: number, max: number) => {
+  const handleRangeChange = (filteredData: { x: string; y: number }[], min: number, max: number) => {
     setDisplayData(filteredData);
     setYAxisRange({ min, max });
   };
 
-  const handleSpikeDetected = (spike: { x: string, y: number }) => {
+  const handleSpikeDetected = (spike: { x: string; y: number }) => {
     console.log('Spike detected:', spike);
   };
 
-  const updateDataTypes = (newDataTypes: string[]) => {
-    setDataTypes(newDataTypes);
-  };
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      fetch('http://localhost:3001/data-types')
-        .then((response) => response.json())
-        .then((data) => updateDataTypes(data))
-        .catch((error) => console.error('Error fetching data types:', error));
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
-
   return (
-    <Draggable handle=".handle-bar">
-      <Resizable
-        width={width}
-        height={height}
-        onResize={(e, { size }) => {
-          setWidth(size.width);
-          setHeight(size.height);
-        }}
-      >
-        <div className="border-2 border-gray-400 rounded shadow p-2" style={{ width, height }}>
-          <Header
-            title={title}
-            dataType={dataType}
-            onDataTypeChange={onDataTypeChange}
-            availableDataTypes={dataTypes}
-            dataPoints={dataPoints}
-            onDataPointsChange={setDataPoints}
-          />
-          <YAxisRangeComponent
-            data={data}
-            displayDataPoints={dataPoints}
-            onRangeChange={handleRangeChange}
-            onSpikeDetected={handleSpikeDetected}
-          />
-          <ChartComponent displayData={displayData} yAxisRange={yAxisRange} />
-          <button onClick={onDelete} className="bg-red-500 text-white rounded px-4 py-2 mt-2">
-            Delete
-          </button>
-        </div>
-      </Resizable>
-    </Draggable>
+    <div className="border-2 border-gray-400 rounded shadow p-2" style={{ width: '100%', height: '100%' }}>
+      <Header
+        title={title}
+        dataType={dataType}
+        onDataTypeChange={onDataTypeChange}
+        availableDataTypes={availableDataTypes}
+        dataPoints={dataPoints}
+        onDataPointsChange={setDataPoints}
+      />
+      <YAxisRangeComponent
+        data={data}
+        displayDataPoints={dataPoints}
+        onRangeChange={handleRangeChange}
+        onSpikeDetected={handleSpikeDetected}
+      />
+      <ChartComponent displayData={displayData} yAxisRange={yAxisRange} />
+      <button onClick={onDelete} className="bg-red-500 text-white rounded px-4 py-2 mt-2">
+        Delete
+      </button>
+    </div>
   );
 };
 
