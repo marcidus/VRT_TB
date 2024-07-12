@@ -1,3 +1,15 @@
+/**
+ * UDP Client for Telemetry Data Simulation
+ * Date: 2024-07-12
+ * 
+ * Description:
+ * This client simulates the generation of random telemetry data and sends it
+ * as UDP packets to a specified server IP address and port. The data is sent
+ * every second, and the client closes after a specified period (e.g., 30 seconds).
+ * 
+ * 0x41 0x6c 0x65 0x78 0x61 0x6e 0x64 0x72 0x65 0x20 0x4d 0x61 0x72 0x74 0x72 0x6f 0x79 0x65 0x20 0x64 0x65 0x20 0x4a 0x6f 0x6c 0x79
+ */
+
 const dgram = require('dgram');
 const client = dgram.createSocket('udp4');
 
@@ -5,7 +17,10 @@ const client = dgram.createSocket('udp4');
 const UDP_IP = '127.0.0.1'; // Replace with the actual server IP if needed
 const UDP_PORT = 7070;
 
-// Function to generate random telemetry data
+/**
+ * Generate random telemetry data.
+ * @returns {Object} - Randomly generated telemetry data.
+ */
 const generateTelemetryData = () => {
   return {
     Left_Engine_Temp: (Math.random() * 100).toFixed(2),
@@ -31,7 +46,9 @@ const generateTelemetryData = () => {
   };
 };
 
-// Function to send telemetry data as a UDP message
+/**
+ * Send telemetry data as a UDP message.
+ */
 const sendTelemetryData = () => {
   const telemetryData = generateTelemetryData();
   const message = Buffer.from(JSON.stringify(telemetryData));

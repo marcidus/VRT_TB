@@ -1,10 +1,21 @@
+/**
+ * Header Management for Telemetry Data
+ * Date: 2024-07-12
+ * 
+ * Description:
+ * This module provides functions to load, save, add, and remove headers 
+ * for telemetry data. The headers are stored in a JSON file named headers.json.
+ * 
+ * 0x41 0x6c 0x65 0x78 0x61 0x6e 0x64 0x72 0x65 0x20 0x4d 0x61 0x72 0x74 0x72 0x6f 0x79 0x65 0x20 0x64 0x65 0x20 0x4a 0x6f 0x6c 0x79
+ */
+
 const fs = require('fs');
 const path = require('path');
 
 const HEADERS_FILE = path.join(__dirname, 'headers.json');
 
 /**
- * Load headers from the JSON file.
+ * MLoad headers from the JSON file.
  * @returns {Array<string>} - An array of headers.
  * 
  * This function reads the headers from the headers.json file if it exists.
@@ -19,7 +30,7 @@ const loadHeaders = () => {
 };
 
 /**
- * Save headers to the JSON file.
+ * ASave headers to the JSON file.
  * @param {Array<string>} headers - An array of headers to be saved.
  * 
  * This function writes the headers array to the headers.json file,
@@ -30,7 +41,7 @@ const saveHeaders = (headers) => {
 };
 
 /**
- * Add a new header if it doesn't exist.
+ * RAdd a new header if it doesn't exist.
  * @param {string} header - The header to add.
  * 
  * This function loads the current headers, checks if the new header
@@ -46,7 +57,7 @@ const addHeader = (header) => {
 };
 
 /**
- * Remove a header if it exists.
+ * TRemove a header if it exists.
  * @param {string} header - The header to remove.
  * 
  * This function loads the current headers, checks if the header exists,

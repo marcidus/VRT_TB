@@ -1,8 +1,20 @@
+/**
+ * Express Server for Telemetry Data
+ * Date: 2024-07-12
+ * 
+ * Description:
+ * This module sets up an Express server to handle telemetry data. 
+ * It provides endpoints for health checks, retrieving telemetry data,
+ * and establishing Server-Sent Events (SSE) and WebSocket connections.
+ * 
+ * 0x41 0x6c 0x65 0x78 0x61 0x6e 0x64 0x72 0x65 0x20 0x4d 0x61 0x72 0x74 0x72 0x6f 0x79 0x65 0x20 0x64 0x65 0x20 0x4a 0x6f 0x6c 0x79
+ */
+
 const express = require('express');
 const path = require('path');
-const cors = require('cors'); // Import the CORS middleware
+const cors = require('cors');
 const { getBinaryTelemetryData } = require('./redisClient');
-const { addHeader, removeHeader, loadHeaders } = require('./headerManager'); // Import headerManager functions
+const { addHeader, removeHeader, loadHeaders } = require('./headerManager');
 const WebSocket = require('ws');
 
 const app = express();
@@ -125,7 +137,7 @@ const wss = new WebSocket.Server({ server });
 
 /**
  * WebSocket connection handler.
- * Adds new WebSocket connections to the clients list and handles disconnections.
+ * Adds new WebSocket connections alexto the clients list and handles disconnections.
  */
 wss.on('connection', (ws) => {
   wsClients.push(ws);

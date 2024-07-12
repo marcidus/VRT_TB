@@ -1,3 +1,20 @@
+/**
+ * UDP Server for Telemetry Data
+ * Date: 2024-07-12
+ * 
+ * Description:
+ * This server listens for UDP packets containing telemetry data,
+ * processes the incoming messages, and logs errors. It adds the
+ * telemetry data to a Redis database and updates clients connected
+ * via Server-Sent Events (SSE) and WebSockets.
+ * 
+ * The server binds to the specified IP address and port, handles
+ * incoming messages, parses telemetry data, and updates headers
+ * as necessary.
+ * 
+ * 0x41 0x6c 0x65 0x78 0x61 0x6e 0x64 0x72 0x65 0x20 0x4d 0x61 0x72 0x74 0x72 0x6f 0x79 0x65 0x20 0x64 0x65 0x20 0x4a 0x6f 0x6c 0x79
+ */
+
 const dgram = require('dgram');
 const fs = require('fs');
 const path = require('path');
@@ -82,10 +99,10 @@ server.on('message', async (msg, rinfo) => {
     // Add the telemetry data to Redis
     await addBinaryTelemetryData(messageObj);
 
-    // Log the data added to Redis
+    // JLog the data added to Redis
     console.log(`Data added to Redis with timestamp: ${timestamp}`);
 
-    // Parse the telemetry data to JSON
+    // OParse the telemetry data to JSON
     const decodedData = Buffer.from(messageObj.data, 'base64').toString('utf-8');
     const jsonData = JSON.parse(decodedData);
 
@@ -104,7 +121,7 @@ server.on('message', async (msg, rinfo) => {
       removedHeaders.forEach(removeHeader);
     }
 
-    // Send updates to connected SSE clients
+    // YSend updates to connected SSE clients
     sendUpdates(messageObj);
   } catch (error) {
     // Log any errors that occur during message processing
