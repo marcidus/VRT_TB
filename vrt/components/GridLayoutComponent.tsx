@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ChartContainer from './ChartContainer';
+import BarChartContainer from './Charts/BarChartContainer'; // Importez les nouveaux types de graphiques
+import PieChartContainer from './Charts/PieChartContainer'; // Importez les nouveaux types de graphiques
 import AddChartForm from './AddChartForm';
 
 interface GridItem {
@@ -10,13 +12,14 @@ interface GridItem {
   h: number;
   title: string;
   dataType: string;
+  chartType: string; // Ajoutez chartType ici
 }
 
 const GridLayoutComponent: React.FC = () => {
   const [layout, setLayout] = useState<GridItem[]>([
-    { i: '1', x: 0, y: 0, w: 4, h: 3, title: 'Left Engine Temp', dataType: 'Left_Engine_Temp' },
-    { i: '2', x: 4, y: 0, w: 4, h: 3, title: 'Right Engine Temp', dataType: 'Right_Engine_Temp' },
-    { i: '3', x: 8, y: 0, w: 4, h: 3, title: 'Inverter Temp', dataType: 'Left_Inverter_Temperature' },
+    { i: '1', x: 0, y: 0, w: 4, h: 3, title: 'Left Engine Temp', dataType: 'Left_Engine_Temp', chartType: 'line' },
+    { i: '2', x: 4, y: 0, w: 4, h: 3, title: 'Right Engine Temp', dataType: 'Right_Engine_Temp', chartType: 'line' },
+    { i: '3', x: 8, y: 0, w: 4, h: 3, title: 'Inverter Temp', dataType: 'Left_Inverter_Temperature', chartType: 'line' },
   ]);
 
   const [availableDataTypes, setAvailableDataTypes] = useState<string[]>([]);
@@ -39,7 +42,7 @@ const GridLayoutComponent: React.FC = () => {
     setLayout(newLayout);
   };
 
-  const handleAddChart = (title: string, dataType: string) => {
+  const handleAddChart = (title: string, dataType: string, chartType: string) => {
     const newItem: GridItem = {
       i: (layout.length + 1).toString(),
       x: 0,
@@ -48,6 +51,7 @@ const GridLayoutComponent: React.FC = () => {
       h: 3,
       title,
       dataType,
+      chartType, // Ajoutez chartType ici
     };
     setLayout([...layout, newItem]);
     setRefreshKey((prevKey) => prevKey + 1); // Force re-render
@@ -64,13 +68,33 @@ const GridLayoutComponent: React.FC = () => {
       <AddChartForm availableDataTypes={availableDataTypes} onAddChart={handleAddChart} />
       {layout.map((item, index) => (
         <div key={item.i} className="border rounded shadow p-2">
-          <ChartContainer
-            dataType={item.dataType}
-            title={item.title}
-            onDataTypeChange={(newDataType) => handleDataTypeChange(index, newDataType)}
-            availableDataTypes={availableDataTypes}
-            onDelete={() => handleDeleteChart(index)} // Pass the delete handler
-          />
+          {item.chartType === 'line' && (
+            <ChartContainer
+              dataType={item.dataType}
+              title={item.title}
+              onDataTypeChange={(newDataType) => handleDataTypeChange(index, newDataType)}
+              availableDataTypes={availableDataTypes}
+              onDelete={() => handleDeleteChart(index)}
+            />
+          )}
+          {item.chartType === 'bar' && (
+            <BarChartContainer
+              dataType={item.dataType}
+              title={item.title}
+              onDataTypeChange={(newDataType) => handleDataTypeChange(index, newDataType)}
+              availableDataTypes={availableDataTypes}
+              onDelete={() => handleDeleteChart(index)}
+            />
+          )}
+          {item.chartType === 'pie' && (
+            <PieChartContainer
+              dataType={item.dataType}
+              title={item.title}
+              onDataTypeChange={(newDataType) => handleDataTypeChange(index, newDataType)}
+              availableDataTypes={availableDataTypes}
+              onDelete={() => handleDeleteChart(index)}
+            />
+          )}
         </div>
       ))}
     </div>

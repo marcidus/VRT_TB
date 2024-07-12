@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 
 interface AddChartFormProps {
   availableDataTypes: string[];
-  onAddChart: (title: string, dataType: string) => void;
+  onAddChart: (title: string, dataType: string, chartType: string) => void; // Ajoutez chartType ici
 }
 
 const AddChartForm: React.FC<AddChartFormProps> = ({ availableDataTypes, onAddChart }) => {
   const [title, setTitle] = useState('');
   const [dataType, setDataType] = useState(availableDataTypes[0] || '');
+  const [chartType, setChartType] = useState('line'); // Par défaut, le type de graphique est 'line'
 
   useEffect(() => {
     if (availableDataTypes.length > 0 && !dataType) {
@@ -17,9 +18,10 @@ const AddChartForm: React.FC<AddChartFormProps> = ({ availableDataTypes, onAddCh
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onAddChart(title, dataType);
+    onAddChart(title, dataType, chartType); // Passez chartType ici
     setTitle('');
-    setDataType(availableDataTypes[0] || ''); // Reset data type to the first available option
+    setDataType(availableDataTypes[0] || '');
+    setChartType('line'); // Réinitialisez à 'line' après soumission
   };
 
   return (
@@ -47,6 +49,19 @@ const AddChartForm: React.FC<AddChartFormProps> = ({ availableDataTypes, onAddCh
               {type}
             </option>
           ))}
+        </select>
+      </div>
+      <div className="mb-2">
+        <label className="mr-2">Chart Type:</label>
+        <select
+          value={chartType}
+          onChange={(e) => setChartType(e.target.value)}
+          className="border rounded p-1"
+          required
+        >
+          <option value="line">Line Chart</option>
+          <option value="bar">Bar Chart</option>
+          <option value="pie">Pie Chart</option>
         </select>
       </div>
       <button type="submit" className="bg-blue-500 text-white rounded px-4 py-2">

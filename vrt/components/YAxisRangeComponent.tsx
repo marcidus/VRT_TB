@@ -19,11 +19,12 @@ const calculateMedian = (values: number[]): number => {
   }
 };
 
-const roundToNearestTen = (value: number): number => {
-  return Math.round(value / 10) * 10;
-};
-
-const YAxisRangeComponent: React.FC<YAxisRangeComponentProps> = ({ data, displayDataPoints, onRangeChange, onSpikeDetected }) => {
+const YAxisRangeComponent: React.FC<YAxisRangeComponentProps> = ({
+  data,
+  displayDataPoints,
+  onRangeChange,
+  onSpikeDetected
+}) => {
   const [percentage, setPercentage] = useState<number>(10);
   const [popupMessage, setPopupMessage] = useState<string | null>(null);
   const [yAxisRange, setYAxisRange] = useState<{ min: number, max: number } | null>(null);
