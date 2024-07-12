@@ -9,12 +9,25 @@ const app = express();
 const port = process.env.PORT || 3001;
 
 let telemetryDataMap = {};
-let clients = [];
+let sseClients = [];
+let wsClients = [];
+let headersUpdated = false;
 
 // Use CORS middleware to enable cross-origin requests
 app.use(cors({
   origin: 'http://localhost:3000' // Update this to match your frontend URL
 }));
+
+app.use(express.json());
+
+app.get('/headers-updated', (req, res) => {
+  res.json({ headersUpdated });
+});
+
+app.post('/toggle-headers-updated', (req, res) => {
+  headersUpdated = !headersUpdated;
+  res.json({ headersUpdated });
+});
 
 app.get('/data-types', (req, res) => {
   try {
@@ -25,10 +38,6 @@ app.get('/data-types', (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 });
-
-
-// Use CORS middleware to enable cross-origin requests
-app.use(cors());
 
 // Serve static files from the 'public' directory
 app.use(express.static(path.join(__dirname, 'public')));
@@ -81,25 +90,25 @@ app.get('/telemetry', async (req, res) => {
  * Endpoint to establish SSE connection.
  * Sends telemetry updates to connected clients.
  */
-app.get('/events', cors(), (req, res) => { // Ensure CORS is applied here as well
+app.get('/events', (req, res) => {
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
   res.flushHeaders();
 
-  clients.push(res);
+  sseClients.push(res);
 
   req.on('close', () => {
-    clients = clients.filter(client => client !== res);
+    sseClients = sseClients.filter(client => client !== res);
   });
 });
 
 /**
- * Function to send updates to all connected clients.
+ * Function to send updates to all connected SSE clients.
  * @param {Object} data - The data to send to clients.
  */
-const sendUpdates = (data) => {
-  clients.forEach(client => {
+const sendUpdatesSSE = (data) => {
+  sseClients.forEach(client => {
     client.write(`data: ${JSON.stringify(data)}\n\n`);
   });
 };
@@ -119,10 +128,10 @@ const wss = new WebSocket.Server({ server });
  * Adds new WebSocket connections to the clients list and handles disconnections.
  */
 wss.on('connection', (ws) => {
-  clients.push(ws);
+  wsClients.push(ws);
 
   ws.on('close', () => {
-    clients = clients.filter(client => client !== ws);
+    wsClients = wsClients.filter(client => client !== ws);
   });
 });
 
@@ -131,9 +140,16 @@ wss.on('connection', (ws) => {
  * @param {Object} data - The data to send to clients.
  */
 const sendUpdatesWS = (data) => {
-  clients.forEach(client => {
+  wsClients.forEach(client => {
     client.send(JSON.stringify(data));
   });
 };
 
-module.exports = { sendUpdates, sendUpdatesWS };
+const sendUpdates = (data) => {
+  sendUpdatesSSE(data);
+  sendUpdatesWS(data);
+};
+
+const getHeadersUpdated = () => headersUpdated;
+
+module.exports = { sendUpdates, getHeadersUpdated };

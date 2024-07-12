@@ -2,8 +2,8 @@ const dgram = require('dgram');
 const fs = require('fs');
 const path = require('path');
 const { addBinaryTelemetryData } = require('./redisClient');
-const { sendUpdates } = require('./expressServer'); // Ensure this import is correct
-const { addHeader, removeHeader, loadHeaders } = require('./headerManager'); // Import headerManager functions
+const { sendUpdates, getHeadersUpdated } = require('./expressServer');
+const { addHeader, removeHeader, loadHeaders } = require('./headerManager');
 
 // IP address and port to bind the UDP server
 const UDP_IP = '0.0.0.0';
@@ -12,9 +12,6 @@ const UDP_PORT = 7070;
 // In-memory error log buffer
 let errorLogBuffer = [];
 const ERROR_LOG_FILE = path.join(__dirname, 'udpServerErrors.log');
-
-// Flag to track if headers have been updated
-let headersUpdated = false;
 
 /**
  * Get high-precision current timestamp.
@@ -95,8 +92,7 @@ server.on('message', async (msg, rinfo) => {
     // Log the parsed telemetry data
     console.log(`Parsed telemetry data: ${JSON.stringify(jsonData)}`);
 
-    // Update headers based on the telemetry data if not already updated
-    if (!headersUpdated) {
+    if (getHeadersUpdated()) {
       const existingHeaders = loadHeaders();
       const newHeaders = Object.keys(jsonData).filter(header => !existingHeaders.includes(header));
       const removedHeaders = existingHeaders.filter(header => !Object.keys(jsonData).includes(header));
@@ -106,8 +102,6 @@ server.on('message', async (msg, rinfo) => {
 
       newHeaders.forEach(addHeader);
       removedHeaders.forEach(removeHeader);
-
-      headersUpdated = true; // Set flag to true to prevent further updates
     }
 
     // Send updates to connected SSE clients

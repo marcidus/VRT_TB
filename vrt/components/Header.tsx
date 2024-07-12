@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 interface HeaderProps {
   title: string;
@@ -17,7 +17,11 @@ const Header: React.FC<HeaderProps> = ({
   dataPoints,
   onDataPointsChange,
 }) => {
-  console.log('Rendering Header with title:', title);
+  useEffect(() => {
+    // Ensure the dropdown menu updates whenever availableDataTypes change
+    console.log('Available data types updated:', availableDataTypes);
+  }, [availableDataTypes]);
+
   return (
     <div className="header-container border-b border-gray-400">
       <div className="header bg-gray-800 p-4 flex items-center justify-between">

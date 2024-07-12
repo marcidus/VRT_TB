@@ -1,7 +1,6 @@
 import React from "react";
 import Image from "next/image";
 import GridLayoutComponent from "../../components/GridLayoutComponent";
-import ExampleComponent from "../../components/ExampleComponent";
 
 export default function Home() {
   return (

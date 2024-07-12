@@ -46,6 +46,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
   const [width, setWidth] = useState<number>(400);
   const [height, setHeight] = useState<number>(400);
   const [yAxisRange, setYAxisRange] = useState<{ min: number, max: number }>({ min: 0, max: 100 });
+  const [dataTypes, setDataTypes] = useState<string[]>(availableDataTypes);
 
   useEffect(() => {
     setData(initialData);
@@ -101,6 +102,21 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
     console.log('Spike detected:', spike);
   };
 
+  const updateDataTypes = (newDataTypes: string[]) => {
+    setDataTypes(newDataTypes);
+  };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetch('http://localhost:3001/data-types')
+        .then((response) => response.json())
+        .then((data) => updateDataTypes(data))
+        .catch((error) => console.error('Error fetching data types:', error));
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <Draggable handle=".handle-bar">
       <Resizable
@@ -116,7 +132,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
             title={title}
             dataType={dataType}
             onDataTypeChange={onDataTypeChange}
-            availableDataTypes={availableDataTypes}
+            availableDataTypes={dataTypes}
             dataPoints={dataPoints}
             onDataPointsChange={setDataPoints}
           />

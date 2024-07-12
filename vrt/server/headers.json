@@ -11,12 +11,12 @@
   "Raw_Direction",
   "lat",
   "lon",
-  "Flag",
   "Left_Radiator_Temp",
   "Car_Speed",
   "GSPSpeed",
   "Suspension_Back_Left",
   "Suspension_Back_Right",
   "Suspension_Front_Left",
-  "Suspension_Front_Right"
+  "Suspension_Front_Right",
+  "Flag"
 ]
