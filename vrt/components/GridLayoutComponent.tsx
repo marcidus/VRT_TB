@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ChartContainer from './ChartContainer';
+import AddChartForm from './AddChartForm';
 
 interface GridItem {
   i: string;
@@ -19,6 +20,7 @@ const GridLayoutComponent: React.FC = () => {
   ]);
 
   const [availableDataTypes, setAvailableDataTypes] = useState<string[]>([]);
+  const [refreshKey, setRefreshKey] = useState<number>(0);
 
   useEffect(() => {
     fetch('http://localhost:3001/data-types')
@@ -37,8 +39,23 @@ const GridLayoutComponent: React.FC = () => {
     setLayout(newLayout);
   };
 
+  const handleAddChart = (title: string, dataType: string) => {
+    const newItem: GridItem = {
+      i: (layout.length + 1).toString(),
+      x: 0,
+      y: 0,
+      w: 4,
+      h: 3,
+      title,
+      dataType,
+    };
+    setLayout([...layout, newItem]);
+    setRefreshKey((prevKey) => prevKey + 1); // Force re-render
+  };
+
   return (
-    <div className="layout">
+    <div className="layout" key={refreshKey}>
+      <AddChartForm availableDataTypes={availableDataTypes} onAddChart={handleAddChart} />
       {layout.map((item, index) => (
         <div key={item.i} className="border rounded shadow p-2">
           <ChartContainer
