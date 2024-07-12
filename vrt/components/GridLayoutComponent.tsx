@@ -53,6 +53,12 @@ const GridLayoutComponent: React.FC = () => {
     setRefreshKey((prevKey) => prevKey + 1); // Force re-render
   };
 
+  const handleDeleteChart = (index: number) => {
+    const newLayout = layout.filter((item, i) => i !== index);
+    setLayout(newLayout);
+    setRefreshKey((prevKey) => prevKey + 1); // Force re-render
+  };
+
   return (
     <div className="layout" key={refreshKey}>
       <AddChartForm availableDataTypes={availableDataTypes} onAddChart={handleAddChart} />
@@ -63,6 +69,7 @@ const GridLayoutComponent: React.FC = () => {
             title={item.title}
             onDataTypeChange={(newDataType) => handleDataTypeChange(index, newDataType)}
             availableDataTypes={availableDataTypes}
+            onDelete={() => handleDeleteChart(index)} // Pass the delete handler
           />
         </div>
       ))}

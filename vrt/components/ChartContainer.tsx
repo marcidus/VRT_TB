@@ -16,6 +16,7 @@ interface ChartContainerProps {
   title: string;
   onDataTypeChange: (newDataType: string) => void;
   availableDataTypes: string[];
+  onDelete: () => void; // Add this prop for deletion
 }
 
 const initialData: ChartDataPoint[] = [];
@@ -38,7 +39,8 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
   dataType,
   title,
   onDataTypeChange,
-  availableDataTypes
+  availableDataTypes,
+  onDelete // Add this prop for deletion
 }) => {
   const [data, setData] = useState<ChartDataPoint[]>(initialData);
   const [displayData, setDisplayData] = useState<ChartDataPoint[]>(initialData);
@@ -143,6 +145,9 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
             onSpikeDetected={handleSpikeDetected}
           />
           <ChartComponent displayData={displayData} yAxisRange={yAxisRange} />
+          <button onClick={onDelete} className="bg-red-500 text-white rounded px-4 py-2 mt-2">
+            Delete
+          </button>
         </div>
       </Resizable>
     </Draggable>
