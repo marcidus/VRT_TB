@@ -57,6 +57,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
   const [displayData, setDisplayData] = useState<ChartDataPoint[]>(initialData); // State to hold the displayed chart data points
   const [dataPoints, setDataPoints] = useState<number>(10); // State to manage the number of displayed data points
   const [yAxisRange, setYAxisRange] = useState<{ min: number; max: number }>({ min: 0, max: 100 }); // State to manage the Y-axis range
+  const [offset, setOffset] = useState<number>(0); // State to manage the offset for dragging
 
   // Effect to handle incoming data from the server
   useEffect(() => {
@@ -106,10 +107,12 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
     return () => eventSource.close();
   }, [dataType]);
 
-  // Effect to update the displayed data when data or dataPoints change
+  // Effect to update the displayed data when data, dataPoints, or offset change
   useEffect(() => {
-    setDisplayData(data.slice(-dataPoints));
-  }, [data, dataPoints]);
+    const start = Math.max(0, data.length - dataPoints - offset);
+    const end = Math.max(0, data.length - offset);
+    setDisplayData(data.slice(start, end));
+  }, [data, dataPoints, offset]);
 
   /**
    * Handler for changing the Y-axis range.
@@ -130,6 +133,17 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
     console.log('Spike detected:', spike);
   };
 
+  /**
+   * Handler for dragging the chart.
+   * @param direction - The direction of the drag ('left' or 'right').
+   */
+  const handleDrag = (direction: 'left' | 'right') => {
+    setOffset((prevOffset) => {
+      const newOffset = direction === 'left' ? prevOffset + 10 : prevOffset - 10;
+      return Math.max(0, newOffset);
+    });
+  };
+
   return (
     <div className="border-2 border-gray-400 rounded shadow p-2" style={{ width: '100%', height: '100%' }}>
       <Header
@@ -146,7 +160,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
         onRangeChange={handleRangeChange}
         onSpikeDetected={handleSpikeDetected}
       />
-      <ChartComponent displayData={displayData} yAxisRange={yAxisRange} />
+      <ChartComponent displayData={displayData} yAxisRange={yAxisRange} onDrag={handleDrag} />
       <button onClick={onDelete} className="bg-red-500 text-white rounded px-4 py-2 mt-2">
         Delete
       </button>
