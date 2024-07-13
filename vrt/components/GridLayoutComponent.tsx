@@ -6,6 +6,7 @@ import AddChartForm from './AddChartForm';
 import CarDataDisplay from './Charts/CarDataDisplay';
 import Draggable from 'react-draggable';
 import { ResizableBox } from 'react-resizable';
+import HeaderToggleButton from './HeaderToggleButton'; // Ensure to import HeaderToggleButton
 import 'react-resizable/css/styles.css';
 
 interface ChartItem {
@@ -53,22 +54,38 @@ const GridLayoutComponent: React.FC = () => {
     Battery: availableDataTypes[0] || '',
   });
 
+  const [headersUpdated, setHeadersUpdated] = useState(false);
+
+  // Function to fetch headers
+  const fetchHeaders = async () => {
+    try {
+      const response = await fetch('http://localhost:3001/data-types');
+      const data = await response.json();
+      setAvailableDataTypes(data);
+      setSelectedDataTypes((prev) => ({
+        Left_Front_Wheel: data[0],
+        Right_Front_Wheel: data[0],
+        Left_Back_Wheel: data[0],
+        Right_Back_Wheel: data[0],
+        Battery: data[0],
+        ...prev,
+      }));
+    } catch (error) {
+      console.error('Error fetching data types:', error);
+    }
+  };
+
   useEffect(() => {
-    fetch('http://localhost:3001/data-types')
-      .then((response) => response.json())
-      .then((data) => {
-        setAvailableDataTypes(data);
-        setSelectedDataTypes((prev) => ({
-          Left_Front_Wheel: data[0],
-          Right_Front_Wheel: data[0],
-          Left_Back_Wheel: data[0],
-          Right_Back_Wheel: data[0],
-          Battery: data[0],
-          ...prev,
-        }));
-      })
-      .catch((error) => console.error('Error fetching data types:', error));
-  }, []);
+    if (headersUpdated) {
+      fetchHeaders(); // Initial fetch
+      const interval = setInterval(fetchHeaders, 5000); // Fetch headers every 5 seconds
+      return () => clearInterval(interval); // Clean up the interval on component unmount
+    }
+  }, [headersUpdated]);
+
+  const toggleHeadersUpdated = (newState) => {
+    setHeadersUpdated(newState);
+  };
 
   const handleDataTypeChange = (index: number, newDataType: string) => {
     const newCharts = [...charts];
@@ -135,6 +152,7 @@ const GridLayoutComponent: React.FC = () => {
 
   return (
     <div className="layout" style={{ position: 'relative', width: '100%', height: '100vh' }}>
+      <HeaderToggleButton headersUpdated={headersUpdated} toggleHeadersUpdated={toggleHeadersUpdated} /> {/* Ensure the toggle button is added */}
       <AddChartForm availableDataTypes={availableDataTypes} onAddChart={handleAddChart} />
       {charts.map((item, index) => (
         <Draggable
