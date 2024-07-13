@@ -1,13 +1,21 @@
+/**
+ * Author: Alexandre Martroye de Joly
+ * Description: This component acts as a container for a chart. It handles fetching and processing real-time data,
+ *              updating the chart display, and providing controls for adjusting the Y-axis range.
+ */
+
 import React, { useState, useEffect } from 'react';
 import Header from './Header';
 import ChartComponent from './ChartComponent';
 import YAxisRangeComponent from './YAxisRangeComponent';
 
+// Define the structure of a data point for the chart
 interface ChartDataPoint {
   x: string;
   y: number;
 }
 
+// Define the props for the ChartContainer component
 interface ChartContainerProps {
   dataType: string;
   title: string;
@@ -16,8 +24,14 @@ interface ChartContainerProps {
   onDelete: () => void;
 }
 
+// Initialize an empty array for the initial data
 const initialData: ChartDataPoint[] = [];
 
+/**
+ * Helper function to truncate the timestamp to a more manageable format.
+ * @param timestamp - The original timestamp string.
+ * @returns A truncated timestamp string.
+ */
 const truncateTimestamp = (timestamp: string): string => {
   try {
     const [datePart, fractionalPart] = timestamp.split('.');
@@ -39,22 +53,26 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
   availableDataTypes,
   onDelete,
 }) => {
-  const [data, setData] = useState<ChartDataPoint[]>(initialData);
-  const [displayData, setDisplayData] = useState<ChartDataPoint[]>(initialData);
-  const [dataPoints, setDataPoints] = useState<number>(10);
-  const [yAxisRange, setYAxisRange] = useState<{ min: number; max: number }>({ min: 0, max: 100 });
+  const [data, setData] = useState<ChartDataPoint[]>(initialData); // State to hold all the chart data points
+  const [displayData, setDisplayData] = useState<ChartDataPoint[]>(initialData); // State to hold the displayed chart data points
+  const [dataPoints, setDataPoints] = useState<number>(10); // State to manage the number of displayed data points
+  const [yAxisRange, setYAxisRange] = useState<{ min: number; max: number }>({ min: 0, max: 100 }); // State to manage the Y-axis range
 
+  // Effect to handle incoming data from the server
   useEffect(() => {
     setData(initialData);
 
+    // Initialize the EventSource to receive real-time data
     const eventSource = new EventSource('http://localhost:3001/events');
 
+    // Event listener for incoming messages
     eventSource.onmessage = (event) => {
       try {
         const newData = JSON.parse(event.data);
         const decodedData = atob(newData.data);
         const parsedData = JSON.parse(decodedData);
 
+        // Check if the received data contains the specified dataType
         if (parsedData[dataType] !== undefined) {
           const truncatedTimestamp = truncateTimestamp(newData.timestamp);
           if (isNaN(Date.parse(truncatedTimestamp))) {
@@ -66,6 +84,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
           setData((prevData) => {
             const updatedData = [...prevData, { x: truncatedTimestamp, y: newValue }];
 
+            // Limit the number of data points to 100
             if (updatedData.length > 100) {
               updatedData.shift();
             }
@@ -78,22 +97,35 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
       }
     };
 
+    // Error event listener
     eventSource.onerror = (error) => {
       console.error('SSE error:', error);
     };
 
+    // Cleanup the EventSource on component unmount
     return () => eventSource.close();
   }, [dataType]);
 
+  // Effect to update the displayed data when data or dataPoints change
   useEffect(() => {
     setDisplayData(data.slice(-dataPoints));
   }, [data, dataPoints]);
 
+  /**
+   * Handler for changing the Y-axis range.
+   * @param filteredData - The filtered data points within the new range.
+   * @param min - The new minimum value of the Y-axis range.
+   * @param max - The new maximum value of the Y-axis range.
+   */
   const handleRangeChange = (filteredData: { x: string; y: number }[], min: number, max: number) => {
     setDisplayData(filteredData);
     setYAxisRange({ min, max });
   };
 
+  /**
+   * Handler for detecting spikes in the data.
+   * @param spike - The data point where a spike is detected.
+   */
   const handleSpikeDetected = (spike: { x: string; y: number }) => {
     console.log('Spike detected:', spike);
   };

@@ -1,13 +1,22 @@
+/**
+ * Author: Alexandre Martroye de Joly
+ * Description: This component calculates and sets the Y-axis range for a chart based on the median of the data.
+ *              It includes a slider to adjust the percentage range around the median and displays a popup message
+ *              if a data spike is detected outside the calculated range.
+ */
+
 import React, { useState, useEffect } from 'react';
 import Popup from './Popup';
 
+// Props for the YAxisRangeComponent
 interface YAxisRangeComponentProps {
-  data: { x: string, y: number }[];
-  displayDataPoints: number;
-  onRangeChange: (filteredData: { x: string, y: number }[], min: number, max: number) => void;
-  onSpikeDetected: (spike: { x: string, y: number }) => void;
+  data: { x: string, y: number }[]; // The data points to be displayed on the chart
+  displayDataPoints: number; // The number of data points to be displayed on the chart
+  onRangeChange: (filteredData: { x: string, y: number }[], min: number, max: number) => void; // Callback to handle range changes
+  onSpikeDetected: (spike: { x: string, y: number }) => void; // Callback to handle detected spikes
 }
 
+// Utility function to calculate the median of an array of numbers
 const calculateMedian = (values: number[]): number => {
   values.sort((a, b) => a - b);
   const middle = Math.floor(values.length / 2);
@@ -56,11 +65,13 @@ const YAxisRangeComponent: React.FC<YAxisRangeComponentProps> = ({
   }, [data, displayDataPoints, percentage, onRangeChange, onSpikeDetected, yAxisRange]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setPopupMessage(null);
-    }, 3000);
+    if (popupMessage) {
+      const timer = setTimeout(() => {
+        setPopupMessage(null);
+      }, 3000);
 
-    return () => clearTimeout(timer);
+      return () => clearTimeout(timer);
+    }
   }, [popupMessage]);
 
   return (

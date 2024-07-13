@@ -1,8 +1,22 @@
+/**
+ * Author: Alexandre Martroye de Joly
+ * Description: This component provides a toggle button to enable or disable header updates. It fetches the initial state
+ *              of header updates from the server and ensures the parent component's state is in sync with this initial state.
+ *              The button's appearance and label change based on whether header updates are enabled or disabled.
+ */
+
 import React, { useState, useEffect } from 'react';
 
-const HeaderToggleButton = ({ headersUpdated, toggleHeadersUpdated }) => {
+// Props for the HeaderToggleButton component
+interface HeaderToggleButtonProps {
+  headersUpdated: boolean; // The current state of header updates
+  toggleHeadersUpdated: (newState: boolean) => void; // Function to toggle the state of header updates
+}
+
+const HeaderToggleButton: React.FC<HeaderToggleButtonProps> = ({ headersUpdated, toggleHeadersUpdated }) => {
   const [initialHeadersUpdated, setInitialHeadersUpdated] = useState(false);
 
+  // Fetch the initial state of headersUpdated from the server when the component mounts
   useEffect(() => {
     console.log('Fetching initial headersUpdated state');
     fetch('http://localhost:3001/headers-updated')
@@ -15,6 +29,7 @@ const HeaderToggleButton = ({ headersUpdated, toggleHeadersUpdated }) => {
       .catch(error => console.error('Error fetching headersUpdated state:', error));
   }, []);
 
+  // Handle the toggle button click event
   const handleToggle = () => {
     console.log('Toggling headersUpdated state');
     fetch('http://localhost:3001/toggle-headers-updated', {

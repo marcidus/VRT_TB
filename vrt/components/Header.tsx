@@ -1,12 +1,19 @@
+/**
+ * Author: Alexandre Martroye de Joly
+ * Description: This component provides a header for chart containers, allowing users to select data types and adjust
+ *              the number of data points to display. It includes a title, a data type dropdown, and a data points slider.
+ */
+
 import React, { useEffect } from 'react';
 
+// Props for the Header component
 interface HeaderProps {
-  title: string;
-  dataType: string;
-  onDataTypeChange: (newDataType: string) => void;
-  availableDataTypes: string[];
-  dataPoints: number;
-  onDataPointsChange: (newPoints: number) => void;
+  title: string; // The title of the chart
+  dataType: string; // The currently selected data type
+  onDataTypeChange: (newDataType: string) => void; // Function to handle changes in data type
+  availableDataTypes: string[]; // List of available data types to select from
+  dataPoints: number; // The number of data points to display
+  onDataPointsChange: (newPoints: number) => void; // Function to handle changes in data points
 }
 
 const Header: React.FC<HeaderProps> = ({

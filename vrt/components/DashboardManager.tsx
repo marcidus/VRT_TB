@@ -1,16 +1,25 @@
+/**
+ * Author: Alexandre Martroye de Joly
+ * Description: This component manages multiple dashboards, allowing users to add, delete, rename, and select dashboards.
+ *              It also manages the state of each dashboard, including its charts and selected data types.
+ */
+
 import React, { useState } from 'react';
 import GridLayoutComponent from './GridLayoutComponent';
 import { DashboardItem } from './DashboardItemTypes';
 
+// Interface to represent a dashboard
 interface Dashboard {
   id: string;
   name: string;
 }
 
+// Props for the DashboardManager component
 interface DashboardManagerProps {
   onTitleChange: (title: string) => void;
 }
 
+// State for each dashboard
 export interface DashboardState {
   charts: DashboardItem[];
   selectedDataTypes: { [key: string]: string };
@@ -19,8 +28,8 @@ export interface DashboardState {
 const DashboardManager: React.FC<DashboardManagerProps> = ({ onTitleChange }) => {
   const [dashboards, setDashboards] = useState<Dashboard[]>([
     { id: '1', name: 'Dashboard 1' }
-  ]);
-  const [selectedDashboard, setSelectedDashboard] = useState<string>('1');
+  ]); // State to manage the list of dashboards
+  const [selectedDashboard, setSelectedDashboard] = useState<string>('1'); // State to manage the currently selected dashboard
   const [dashboardStates, setDashboardStates] = useState<{ [key: string]: DashboardState }>({
     '1': {
       charts: [],
@@ -32,8 +41,11 @@ const DashboardManager: React.FC<DashboardManagerProps> = ({ onTitleChange }) =>
         Battery: ''
       }
     }
-  });
+  }); // State to manage the state of each dashboard
 
+  /**
+   * Adds a new dashboard.
+   */
   const addDashboard = () => {
     const newId = (dashboards.length + 1).toString();
     const newDashboard = { id: newId, name: `New Dashboard ${newId}` };
@@ -55,6 +67,10 @@ const DashboardManager: React.FC<DashboardManagerProps> = ({ onTitleChange }) =>
     }));
   };
 
+  /**
+   * Deletes a dashboard by its ID.
+   * @param id - The ID of the dashboard to delete.
+   */
   const deleteDashboard = (id: string) => {
     if (id === '1') return; // Prevent deletion of the first dashboard
     const newDashboards = dashboards.filter(dashboard => dashboard.id !== id);
@@ -71,6 +87,11 @@ const DashboardManager: React.FC<DashboardManagerProps> = ({ onTitleChange }) =>
     });
   };
 
+  /**
+   * Renames a dashboard by its ID.
+   * @param oldDashboardId - The old ID of the dashboard to rename.
+   * @param newDashboardId - The new ID of the dashboard.
+   */
   const renameDashboard = (oldDashboardId: string, newDashboardId: string) => {
     const dashboardState = dashboardStates[oldDashboardId];
     if (dashboardState) {
@@ -87,11 +108,21 @@ const DashboardManager: React.FC<DashboardManagerProps> = ({ onTitleChange }) =>
     }
   };
 
+  /**
+   * Handles the selection of a dashboard.
+   * @param id - The ID of the selected dashboard.
+   * @param name - The name of the selected dashboard.
+   */
   const handleSelectDashboard = (id: string, name: string) => {
     setSelectedDashboard(id);
     onTitleChange(name);
   };
 
+  /**
+   * Updates the charts for a given dashboard.
+   * @param dashboardId - The ID of the dashboard to update.
+   * @param charts - The updated list of charts.
+   */
   const handleUpdateCharts = (dashboardId: string, charts: DashboardItem[]) => {
     setDashboardStates((prev) => ({
       ...prev,
@@ -102,6 +133,11 @@ const DashboardManager: React.FC<DashboardManagerProps> = ({ onTitleChange }) =>
     }));
   };
 
+  /**
+   * Updates the selected data types for a given dashboard.
+   * @param dashboardId - The ID of the dashboard to update.
+   * @param selectedDataTypes - The updated selected data types.
+   */
   const handleUpdateSelectedDataTypes = (dashboardId: string, selectedDataTypes: { [key: string]: string }) => {
     setDashboardStates((prev) => ({
       ...prev,

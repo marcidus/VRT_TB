@@ -1,16 +1,24 @@
+/**
+ * Author: Alexandre Martroye de Joly
+ * Description: This component renders a draggable and resizable bar chart that receives real-time data updates
+ *              from a server. It also includes a header for settings and a component for adjusting the Y-axis range.
+ */
+
 import React, { useEffect, useState } from 'react';
 import Header from '../Header';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import YAxisRangeComponent from '../YAxisRangeComponent'; // Import the YAxisRangeComponent
+import YAxisRangeComponent from '../YAxisRangeComponent';
 import Draggable from 'react-draggable';
 import { Resizable } from "react-resizable";
 import 'react-resizable/css/styles.css';
 
+// Define the structure of a data point for the chart
 interface ChartDataPoint {
   x: string;
   y: number;
 }
 
+// Define the props for the BarChartContainer component
 interface BarChartContainerProps {
   dataType: string;
   title: string;
@@ -19,8 +27,14 @@ interface BarChartContainerProps {
   onDelete: () => void;
 }
 
+// Initialize an empty array for the initial data
 const initialData: ChartDataPoint[] = [];
 
+/**
+ * Helper function to truncate the timestamp to a more manageable format.
+ * @param timestamp - The original timestamp string.
+ * @returns A truncated timestamp string.
+ */
 const truncateTimestamp = (timestamp: string): string => {
   try {
     const [datePart, fractionalPart] = timestamp.split('.');
@@ -42,24 +56,28 @@ const BarChartContainer: React.FC<BarChartContainerProps> = ({
   availableDataTypes,
   onDelete
 }) => {
-  const [data, setData] = useState<ChartDataPoint[]>(initialData);
-  const [displayData, setDisplayData] = useState<ChartDataPoint[]>(initialData);
-  const [dataPoints, setDataPoints] = useState<number>(10);
-  const [width, setWidth] = useState<number>(400);
-  const [height, setHeight] = useState<number>(400);
-  const [yAxisRange, setYAxisRange] = useState<{ min: number, max: number }>({ min: 0, max: 100 });
+  const [data, setData] = useState<ChartDataPoint[]>(initialData); // State to hold all the chart data points
+  const [displayData, setDisplayData] = useState<ChartDataPoint[]>(initialData); // State to hold the displayed chart data points
+  const [dataPoints, setDataPoints] = useState<number>(10); // State to manage the number of displayed data points
+  const [width, setWidth] = useState<number>(400); // State to manage the width of the chart container
+  const [height, setHeight] = useState<number>(400); // State to manage the height of the chart container
+  const [yAxisRange, setYAxisRange] = useState<{ min: number, max: number }>({ min: 0, max: 100 }); // State to manage the Y-axis range
 
+  // Effect to handle incoming data from the server
   useEffect(() => {
     setData(initialData);
 
+    // Initialize the EventSource to receive real-time data
     const eventSource = new EventSource('http://localhost:3001/events');
 
+    // Event listener for incoming messages
     eventSource.onmessage = (event) => {
       try {
         const newData = JSON.parse(event.data);
         const decodedData = atob(newData.data);
         const parsedData = JSON.parse(decodedData);
 
+        // Check if the received data contains the specified dataType
         if (parsedData[dataType] !== undefined) {
           const truncatedTimestamp = truncateTimestamp(newData.timestamp);
           if (isNaN(Date.parse(truncatedTimestamp))) {
@@ -71,6 +89,7 @@ const BarChartContainer: React.FC<BarChartContainerProps> = ({
           setData((prevData) => {
             const updatedData = [...prevData, { x: truncatedTimestamp, y: newValue }];
 
+            // Limit the number of data points to 100
             if (updatedData.length > 100) {
               updatedData.shift();
             }
@@ -83,22 +102,35 @@ const BarChartContainer: React.FC<BarChartContainerProps> = ({
       }
     };
 
+    // Error event listener
     eventSource.onerror = (error) => {
       console.error('SSE error:', error);
     };
 
+    // Cleanup the EventSource on component unmount
     return () => eventSource.close();
   }, [dataType]);
 
+  // Effect to update the displayed data when data or dataPoints change
   useEffect(() => {
     setDisplayData(data.slice(-dataPoints));
   }, [data, dataPoints]);
 
+  /**
+   * Handler for changing the Y-axis range.
+   * @param filteredData - The filtered data points within the new range.
+   * @param min - The new minimum value of the Y-axis range.
+   * @param max - The new maximum value of the Y-axis range.
+   */
   const handleRangeChange = (filteredData: { x: string, y: number }[], min: number, max: number) => {
     setDisplayData(filteredData);
     setYAxisRange({ min, max });
   };
 
+  /**
+   * Handler for detecting spikes in the data.
+   * @param spike - The data point where a spike is detected.
+   */
   const handleSpikeDetected = (spike: { x: string, y: number }) => {
     console.log('Spike detected:', spike);
   };

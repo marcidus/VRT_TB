@@ -1,8 +1,16 @@
+/**
+ * Author: Alexandre Martroye de Joly
+ * Description: This component displays car-related data using draggable and resizable elements.
+ *              It fetches real-time data from a server and updates the displayed values.
+ *              Users can add labels, change their positions, and select the data type for each label.
+ */
+
 import React, { useState, useEffect } from 'react';
 import Draggable from 'react-draggable';
 import { Resizable } from 'react-resizable';
 import 'react-resizable/css/styles.css';
 
+// Define the props for the CarDataDisplay component
 interface CarDataDisplayProps {
   onDelete: () => void;
   availableDataTypes: string[];
@@ -20,8 +28,11 @@ const CarDataDisplay: React.FC<CarDataDisplayProps> = ({
   onPositionChange,
   data
 }) => {
+  // State to manage the width and height of the component
   const [width, setWidth] = useState<number>(400);
   const [height, setHeight] = useState<number>(600);
+
+  // State to manage the labels and their positions
   const [labels, setLabels] = useState<{ [key: string]: string }>({
     Left_Front_Wheel: 'Left Front Wheel',
     Right_Front_Wheel: 'Right Front Wheel',
@@ -38,8 +49,10 @@ const CarDataDisplay: React.FC<CarDataDisplayProps> = ({
     Battery: { x: 175, y: 275 },
   });
 
+  // State to manage the latest data received from the server
   const [latestData, setLatestData] = useState<{ [key: string]: any }>({});
 
+  // Effect to handle incoming data from the server
   useEffect(() => {
     const eventSource = new EventSource('http://localhost:3001/events');
     eventSource.onmessage = (event) => {
@@ -66,6 +79,7 @@ const CarDataDisplay: React.FC<CarDataDisplayProps> = ({
     return () => eventSource.close();
   }, [selectedDataTypes]);
 
+  // Effect to initialize the selected data types
   useEffect(() => {
     if (availableDataTypes.length > 0) {
       const initialSelectedDataTypes = { ...selectedDataTypes };
@@ -81,10 +95,18 @@ const CarDataDisplay: React.FC<CarDataDisplayProps> = ({
     }
   }, [availableDataTypes]);
 
+  /**
+   * Handler for changing the label of a data point.
+   * @param key - The key of the label to change.
+   * @param newLabel - The new label value.
+   */
   const handleLabelChange = (key: string, newLabel: string) => {
     setLabels({ ...labels, [key]: newLabel });
   };
 
+  /**
+   * Handler for adding a new label.
+   */
   const handleAddLabel = () => {
     const newKey = `Label_${Object.keys(labels).length + 1}`;
     setLabels({ ...labels, [newKey]: 'New Label' });

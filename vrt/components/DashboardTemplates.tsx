@@ -1,16 +1,34 @@
+/**
+ * Author: Alexandre Martroye de Joly
+ * Description: This component provides functionality to manage dashboard templates. Users can load, save, import, export,
+ *              rename, and delete templates. The component is fixed in the top right corner of the screen.
+ */
+
 import React from 'react';
 import { DashboardItem } from './DashboardItemTypes';
 
+// Props for the DashboardTemplates component
 interface DashboardTemplatesProps {
   templates: { [key: string]: DashboardItem[] };
   onLoadTemplate: (templateName: string) => void;
   onImportTemplate: (templateName: string, state: DashboardItem[]) => void;
   onDeleteTemplate: (templateName: string) => void;
   onRenameTemplate: (oldTemplateName: string, newTemplateName: string) => void;
-  onSaveTemplate: (templateName: string) => void; // Add this prop
+  onSaveTemplate: (templateName: string) => void; // Prop to save a template
 }
 
-const DashboardTemplates: React.FC<DashboardTemplatesProps> = ({ templates, onLoadTemplate, onImportTemplate, onDeleteTemplate, onRenameTemplate, onSaveTemplate }) => {
+const DashboardTemplates: React.FC<DashboardTemplatesProps> = ({
+  templates,
+  onLoadTemplate,
+  onImportTemplate,
+  onDeleteTemplate,
+  onRenameTemplate,
+  onSaveTemplate
+}) => {
+  /**
+   * Exports the template to a JSON file.
+   * @param templateName - The name of the template to export.
+   */
   const handleExport = (templateName: string) => {
     const state = templates[templateName];
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
@@ -22,6 +40,10 @@ const DashboardTemplates: React.FC<DashboardTemplatesProps> = ({ templates, onLo
     downloadAnchorNode.remove();
   };
 
+  /**
+   * Handles importing a template from a JSON file.
+   * @param event - The file input change event.
+   */
   const handleImport = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files && event.target.files[0];
     if (file) {
@@ -39,12 +61,20 @@ const DashboardTemplates: React.FC<DashboardTemplatesProps> = ({ templates, onLo
     }
   };
 
+  /**
+   * Handles deleting a template.
+   * @param templateName - The name of the template to delete.
+   */
   const handleDelete = (templateName: string) => {
     if (window.confirm(`Are you sure you want to delete the template "${templateName}"?`)) {
       onDeleteTemplate(templateName);
     }
   };
 
+  /**
+   * Handles renaming a template.
+   * @param oldTemplateName - The current name of the template.
+   */
   const handleRename = (oldTemplateName: string) => {
     const newTemplateName = prompt('Enter a new name for the template:', oldTemplateName);
     if (newTemplateName && newTemplateName !== oldTemplateName) {

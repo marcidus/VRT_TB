@@ -1,7 +1,15 @@
+/**
+ * Author: Alexandre Martroye de Joly
+ * Description: This component displays a popup message at the bottom-right corner of the screen.
+ *              The popup has a red background and white text, and is styled with padding, margin, 
+ *              rounded corners, and a shadow.
+ */
+
 import React from 'react';
 
+// Props for the Popup component
 interface PopupProps {
-  message: string;
+  message: string; // The message to display in the popup
 }
 
 const Popup: React.FC<PopupProps> = ({ message }) => {
