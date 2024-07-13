@@ -10,6 +10,8 @@ import 'leaflet.offline';
 import { tileLayerOffline, ControlSaveTiles, TileLayerOffline, savetiles } from 'leaflet.offline';
 import html2canvas from 'html2canvas';
 import Popup from 'reactjs-popup';
+import { BiSolidFileImport, BiSolidFileImage, BiSolidFileJson, BiSolidSave, BiSolidDirectionLeft } from "react-icons/bi";
+
 
 export default function MapComponent(props: any) {
   const [polylinePoints, setPolylinePoints] = useState<L.LatLng[]>([]);
@@ -32,6 +34,35 @@ export default function MapComponent(props: any) {
     }, [points, map]);
     return null;
   };
+
+  //Function to get computer current location
+  const getCurrentLocation = () => {
+    return new Promise((resolve, reject) => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const { latitude, longitude } = position.coords;
+            resolve({ latitude, longitude });
+          },
+          (error) => {
+            reject(error);
+          }
+        );
+      } else {
+        reject(new Error("Geolocation is not supported by this browser."));
+      }
+    });
+  };
+
+  useEffect(() => {
+    console.log('Getting current location...');
+    var position = getCurrentLocation().then((pos) => {
+      console.log('Current location:', L.latLng(pos.latitude, pos.longitude));
+      setCenter(L.latLng(pos.latitude, pos.longitude));
+    }, (error) => {
+      console.error(error);
+    });
+  }, []);
 
 
   //Temporary function to handle file upload
@@ -65,11 +96,10 @@ export default function MapComponent(props: any) {
   };
 
   // Websocket connection to update the marker position
-  const [markerPosition, setMarkerPosition] = useState<L.LatLng>(L.latLng(46.174764452886265, 7.223735237766073));
+  const [markerPosition, setMarkerPosition] = useState<L.LatLng>(L.latLng(0, 0));
 
   useEffect(() => {
     const ws = new WebSocket('ws://localhost:8080');
-
     ws.onmessage = (event) => {
       try {
         // Parse the JSON message
@@ -87,7 +117,7 @@ export default function MapComponent(props: any) {
           // Validate the extracted latitude and longitude
           if (!isNaN(lat) && !isNaN(lon) && lat !== 0 && lon !== 0) {
             setPolylinePoints(prevPoints => {
-              if(prevPoints.length === 0) {
+              if (prevPoints.length === 0) {
                 return [L.latLng(lat, lon)];
               }
               return [...prevPoints, L.latLng(lat, lon)];
@@ -110,15 +140,23 @@ export default function MapComponent(props: any) {
     };
   }, []);
 
+  //Popup for save files to add to files (errors from editor are normal => typscript error)
   const SavePopup = () => {
     let name;
-    return <Popup trigger={<button className='btn'> Save Tiles </button>} modal>
-      <span>
-        <h2>Save Tiles</h2>
-        <p>Name of the file :</p>
-        <input type="text" placeholder="File Name" onChange={(e) => name = e.target.value} />
-        <button onClick={() => handleSaveTiles(name)}>Save</button>
-      </span>
+    return <Popup trigger={<button className='map-btn'>{<BiSolidSave className='map-btn-icon' />} Save Tiles </button>} modal>
+      {close => (
+        <span>
+          <button className="close" onClick={() => {
+            close();
+          }}>
+            &times;
+          </button>
+          <h2>Save Tiles</h2>
+          <p>Name for the map image and json file :</p>
+          <input type="text" placeholder="File Name" onChange={(e) => name = e.target.value} />
+          <button onClick={() => handleSaveTiles(name)}>Save</button>
+        </span>
+      )}
     </Popup>
   }
   const handleSaveTiles = (name: String) => {
@@ -136,28 +174,6 @@ export default function MapComponent(props: any) {
     }).then(() => {
       setBoolBounds(true);
     });
-  }
-
-  const LoadPopup = () => {
-    return <Popup trigger={<button className='btn'> Load Tiles </button>} modal>
-      <span>
-        <h2>Load tiles</h2>
-        <table>
-          <tr>
-            <th>Map</th>
-            <th>Json</th>
-          </tr>
-          <tr>
-            <td>
-              <input type="file" onChange={handleImageUpload} accept=".png" />
-            </td>
-            <td>
-              <input type="file" onChange={handleJsonUpload} accept=".json" />
-            </td>
-          </tr>
-        </table>
-      </span>
-    </Popup>
   }
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -214,19 +230,21 @@ export default function MapComponent(props: any) {
     return null;
   }
 
+  //function to reset the map
   const resetMap = () => {
     setPolylinePoints([]);
     setImageUrl(null)
-    setMarkerPosition(L.latLng(0,0))
+    setMarkerPosition(L.latLng(0, 0))
+    setCenter(center)
   }
 
-  return (
+  return (<div>
     <div className='mapDiv' style={{
       backgroundImage: imageUrl ? `url(${imageUrl})` : 'none',
       backgroundSize: 'cover', // Ensure the image covers the div
       backgroundPosition: 'center' // Center the background image
     }}>
-      <MapContainer id='map' center={center} zoom={19} scrollWheelZoom={false} className='map' zoomDelta={0.25} zoomSnap={0}>
+      <MapContainer id='map' center={center} zoom={10} scrollWheelZoom={false} className='map' zoomDelta={0.25} zoomSnap={0}>
         {imageUrl == null && (
           <TileLayer url='https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}' />
         )}
@@ -235,14 +253,38 @@ export default function MapComponent(props: any) {
         <GetBounds bool={boolBounds} />
         <SetBounds bounds={mapBounds} />
       </MapContainer>
-      CSV upload
-      <input className='btn' type="file" onChange={handleFileUpload} accept=".csv" />
-      Map upload
-      <input className='btn' type="file" onChange={handleImageUpload} accept=".png" />
-      JSON upload
-      <input className='btn' type="file" onChange={handleJsonUpload} accept=".json" />
-      <SavePopup />
-      <button className='btn' onClick={resetMap}>Reset Map Tile</button>
-    </div>);
+      <table>
+        <tr>
+          <td>
+            <label className='map-btn'>
+              <input type="file" onChange={handleFileUpload} accept=".csv" />
+              {<BiSolidFileImport className='map-btn-icon' />} Upload CSV
+            </label>
+          </td>
+          <td>
+            <label className='map-btn'>
+              <input type="file" onChange={handleImageUpload} accept=".png" />
+              {<BiSolidFileImage className='map-btn-icon' />} Upload Map Image
+            </label>
+          </td>
+          <td>
+            <label className='map-btn'>
+              <input className='btn' type="file" onChange={handleJsonUpload} accept=".json" />
+              {<BiSolidFileJson className='map-btn-icon' />} Upload JSON
+            </label>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <SavePopup />
+          </td>
+          <td>
+            <button className='map-btn' onClick={resetMap}>{<BiSolidDirectionLeft className='map-btn-icon' />}Reset Map Tile</button>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+  );
 
 }
