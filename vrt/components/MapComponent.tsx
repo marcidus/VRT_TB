@@ -11,6 +11,9 @@ import { tileLayerOffline, ControlSaveTiles, TileLayerOffline, savetiles } from 
 import html2canvas from 'html2canvas';
 import Popup from 'reactjs-popup';
 import { BiSolidFileImport, BiSolidFileImage, BiSolidFileJson, BiSolidSave, BiSolidDirectionLeft } from "react-icons/bi";
+import "leaflet-control-geocoder/dist/Control.Geocoder.css";
+import "leaflet-control-geocoder/dist/Control.Geocoder.js";
+
 
 
 export default function MapComponent(props: any) {
@@ -238,6 +241,47 @@ export default function MapComponent(props: any) {
     setCenter(center)
   }
 
+  //Function to add search bar to the map
+  const GeoControlSearchBar = () => {
+    const map = useMap();
+    const geocoderControlAdded = useRef(false);
+
+    useEffect(() => {
+      // Step 2: Singleton pattern check
+      if (!geocoderControlAdded.current) {
+        // Step 3: Explicit removal before addition
+        const existingControl = map._controlCorners.topright.querySelector('.leaflet-control-geocoder');
+        if (existingControl) {
+          existingControl.remove(); // Remove existing control if found
+        }
+
+        // Custom Nominatim Geocoder to search globally
+        var customNominatimGeocoder = new L.Control.Geocoder.Nominatim();
+        var originalGeocodeMethod = customNominatimGeocoder.geocode.bind(customNominatimGeocoder);
+        customNominatimGeocoder.geocode = function (query, cb, context) {
+          // Modify query here if needed before passing it to the original geocode method
+          return originalGeocodeMethod(query, cb, context);
+        };
+
+        // Add the geocoder control
+        L.Control.geocoder({
+          query: "",
+          placeholder: "Search here...",
+          defaultMarkGeocode: false,
+          geocoder: customNominatimGeocoder,
+          showUniqueResult: false,
+        }).on('markgeocode', function (e) {
+          const center = e.geocode.center;
+          const zoomLevel = 15;
+          map.setView(center, zoomLevel);
+        }).addTo(map);
+        geocoderControlAdded.current = true; // Mark as added
+      }
+    }, [map]); // Dependency array ensures this runs only when `map` is initialized or changed
+
+    return null; // This component does not render anything itself
+  };
+
   return (<div>
     <div className='mapDiv' style={{
       backgroundImage: imageUrl ? `url(${imageUrl})` : 'none',
@@ -252,6 +296,7 @@ export default function MapComponent(props: any) {
         <Marker position={markerPosition} />
         <GetBounds bool={boolBounds} />
         <SetBounds bounds={mapBounds} />
+        <GeoControlSearchBar />
       </MapContainer>
       <table>
         <tr>
