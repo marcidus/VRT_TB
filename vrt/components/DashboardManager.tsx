@@ -25,6 +25,7 @@ const DashboardManager: React.FC<DashboardManagerProps> = ({ onTitleChange }) =>
   };
 
   const deleteDashboard = (id: string) => {
+    if (id === '1') return; // Prevent deletion of the first dashboard
     const newDashboards = dashboards.filter(dashboard => dashboard.id !== id);
     setDashboards(newDashboards);
     if (selectedDashboard === id && newDashboards.length > 0) {
@@ -65,15 +66,17 @@ const DashboardManager: React.FC<DashboardManagerProps> = ({ onTitleChange }) =>
               onChange={e => renameDashboard(dashboard.id, e.target.value)}
               className={`bg-transparent border-none ${selectedDashboard === dashboard.id ? 'text-white' : 'text-gray-200'} outline-none`}
             />
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                deleteDashboard(dashboard.id);
-              }}
-              className="ml-2 bg-red-500 text-white rounded px-2 hover:bg-red-700 transition-colors"
-            >
-              X
-            </button>
+            {dashboard.id !== '1' && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  deleteDashboard(dashboard.id);
+                }}
+                className="ml-2 bg-red-500 text-white rounded px-2 hover:bg-red-700 transition-colors"
+              >
+                X
+              </button>
+            )}
           </div>
         ))}
         <button
