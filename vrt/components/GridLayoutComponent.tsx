@@ -4,39 +4,22 @@ import BarChartContainer from './Charts/BarChartContainer';
 import PieChartContainer from './Charts/PieChartContainer';
 import AddChartForm from './AddChartForm';
 import CarDataDisplay from './Charts/CarDataDisplay';
-import Draggable, { DraggableEvent, DraggableData } from 'react-draggable'; // Ensure DraggableEvent and DraggableData are imported
-import { ResizableBox, ResizableBoxProps, ResizeCallbackData } from 'react-resizable'; // Ensure ResizableBoxProps and ResizeCallbackData are imported
+import Draggable, { DraggableEvent, DraggableData } from 'react-draggable';
+import { ResizableBox, ResizeCallbackData } from 'react-resizable';
 import HeaderToggleButton from './HeaderToggleButton';
 import 'react-resizable/css/styles.css';
+import { CarDataItem, ChartItem, DashboardItem } from './DashboardItemTypes';
+import DashboardTemplates from './DashboardTemplates';
 
-interface ChartItem {
-  id: string;
-  title: string;
-  dataType: string;
-  chartType: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
+interface GridLayoutComponentProps {
+  charts: DashboardItem[];
+  selectedDataTypes: { [key: string]: string };
+  onUpdateCharts: (charts: DashboardItem[]) => void;
+  onUpdateSelectedDataTypes: (selectedDataTypes: { [key: string]: string }) => void;
 }
 
-interface CarDataItem {
-  id: string;
-  type: 'car';
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
-
-type DashboardItem = ChartItem | CarDataItem;
-
-const GridLayoutComponent: React.FC = () => {
-  const [charts, setCharts] = useState<DashboardItem[]>([
-    { id: '1', title: 'Left Engine Temp', dataType: 'Left_Engine_Temp', chartType: 'line', x: 0, y: 0, width: 300, height: 200 },
-    { id: '2', title: 'Right Engine Temp', dataType: 'Right_Engine_Temp', chartType: 'line', x: 200, y: 0, width: 300, height: 200 },
-    { id: '3', title: 'Inverter Temp', dataType: 'Left_Inverter_Temperature', chartType: 'line', x: 400, y: 0, width: 300, height: 200 },
-  ]);
+const GridLayoutComponent: React.FC<GridLayoutComponentProps> = ({ charts: initialCharts, selectedDataTypes: initialSelectedDataTypes, onUpdateCharts, onUpdateSelectedDataTypes }) => {
+  const [charts, setCharts] = useState<DashboardItem[]>(initialCharts);
   const [availableDataTypes, setAvailableDataTypes] = useState<string[]>([]);
   const [carData, setCarData] = useState<{ [key: string]: number }>({
     Left_Front_Wheel: 0,
@@ -46,17 +29,11 @@ const GridLayoutComponent: React.FC = () => {
     Battery: 0,
   });
 
-  const [selectedDataTypes, setSelectedDataTypes] = useState<{ [key: string]: string }>({
-    Left_Front_Wheel: availableDataTypes[0] || '',
-    Right_Front_Wheel: availableDataTypes[0] || '',
-    Left_Back_Wheel: availableDataTypes[0] || '',
-    Right_Back_Wheel: availableDataTypes[0] || '',
-    Battery: availableDataTypes[0] || '',
-  });
+  const [selectedDataTypes, setSelectedDataTypes] = useState<{ [key: string]: string }>(initialSelectedDataTypes);
+  const [templates, setTemplates] = useState<{ [key: string]: DashboardItem[] }>({});
 
   const [headersUpdated, setHeadersUpdated] = useState(false);
 
-  // Function to fetch headers
   const fetchHeaders = async () => {
     try {
       const response = await fetch('http://localhost:3001/data-types');
@@ -77,13 +54,22 @@ const GridLayoutComponent: React.FC = () => {
 
   useEffect(() => {
     if (headersUpdated) {
-      fetchHeaders(); // Initial fetch
-      const interval = setInterval(fetchHeaders, 5000); // Fetch headers every 5 seconds
-      return () => clearInterval(interval); // Clean up the interval on component unmount
+      fetchHeaders();
+      const interval = setInterval(fetchHeaders, 5000);
+      return () => clearInterval(interval);
     }
   }, [headersUpdated]);
 
-  const toggleHeadersUpdated = (newState: boolean) => { // Explicitly type newState
+  useEffect(() => {
+    const savedTemplates = JSON.parse(localStorage.getItem('dashboardTemplates') || '{}');
+    setTemplates(savedTemplates);
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('dashboardTemplates', JSON.stringify(templates));
+  }, [templates]);
+
+  const toggleHeadersUpdated = (newState: boolean) => {
     setHeadersUpdated(newState);
   };
 
@@ -96,21 +82,22 @@ const GridLayoutComponent: React.FC = () => {
       title: newDataType.replace(/_/g, ' '),
     };
     setCharts(newCharts);
+    onUpdateCharts(newCharts);
   };
 
   const handleAddChart = (title: string, dataType: string, chartType: 'line' | 'bar' | 'car') => {
+    let newItem: DashboardItem;
     if (chartType === 'car') {
-      const newItem: CarDataItem = {
+      newItem = {
         id: (charts.length + 1).toString(),
         type: 'car',
         x: 0,
         y: 0,
         width: 400,
         height: 600,
-      };
-      setCharts([...charts, newItem]);
+      } as CarDataItem;
     } else {
-      const newItem: ChartItem = {
+      newItem = {
         id: (charts.length + 1).toString(),
         title,
         dataType,
@@ -119,37 +106,94 @@ const GridLayoutComponent: React.FC = () => {
         y: 0,
         width: 300,
         height: 200,
-      };
-      setCharts([...charts, newItem]);
+      } as ChartItem;
     }
+    const newCharts = [...charts, newItem];
+    setCharts(newCharts);
+    onUpdateCharts(newCharts);
   };
 
   const handleDeleteChart = (index: number) => {
     const newCharts = charts.filter((_, i) => i !== index);
     setCharts(newCharts);
+    onUpdateCharts(newCharts);
   };
 
-  const handleDragStop = (e: DraggableEvent, data: DraggableData, index: number) => { // Explicitly type e and data
+  const handleDragStop = (e: DraggableEvent, data: DraggableData, index: number) => {
     const newCharts = [...charts];
     newCharts[index].x = data.x;
     newCharts[index].y = data.y;
     setCharts(newCharts);
+    onUpdateCharts(newCharts);
   };
 
-  const handleResizeStop = (e: React.SyntheticEvent<Element>, data: ResizeCallbackData, index: number) => { // Explicitly type e and data
+  const handleResizeStop = (e: React.SyntheticEvent<Element>, data: ResizeCallbackData, index: number) => {
     const { size } = data;
     const newCharts = [...charts];
     newCharts[index].width = size.width;
     newCharts[index].height = size.height;
     setCharts(newCharts);
+    onUpdateCharts(newCharts);
   };
 
   const handleCarDataTypeChange = (position: string, newDataType: string) => {
-    setSelectedDataTypes((prev) => ({
-      ...prev,
+    const newSelectedDataTypes = {
+      ...selectedDataTypes,
       [position]: newDataType,
+    };
+    setSelectedDataTypes(newSelectedDataTypes);
+    onUpdateSelectedDataTypes(newSelectedDataTypes);
+  };
+
+  const handleSaveAsTemplate = (templateName: string) => {
+    setTemplates((prev) => ({
+      ...prev,
+      [templateName]: charts
     }));
   };
+
+  const handleLoadTemplate = (templateName: string) => {
+    const templateCharts = templates[templateName];
+    if (templateCharts) {
+      setCharts(templateCharts);
+      onUpdateCharts(templateCharts);
+    }
+  };
+
+  const handleImportTemplate = (templateName: string, importedCharts: DashboardItem[]) => {
+    setTemplates((prev) => ({
+      ...prev,
+      [templateName]: importedCharts
+    }));
+  };
+
+  const handleDeleteTemplate = (templateName: string) => {
+    setTemplates((prev) => {
+      const { [templateName]: _, ...rest } = prev;
+      return rest;
+    });
+  };
+
+  const handleRenameTemplate = (oldTemplateName: string, newTemplateName: string) => {
+    const templateCharts = templates[oldTemplateName];
+    if (templateCharts) {
+      setTemplates((prev) => {
+        const { [oldTemplateName]: _, ...rest } = prev;
+        return {
+          ...rest,
+          [newTemplateName]: templateCharts
+        };
+      });
+    }
+  };
+
+  useEffect(() => {
+    setCharts(initialCharts);
+  }, [initialCharts]);
+
+  useEffect(() => {
+    setSelectedDataTypes(initialSelectedDataTypes);
+  }, [initialSelectedDataTypes]);
 
   return (
     <div className="layout" style={{ position: 'relative', width: '100%', height: '100vh' }}>
@@ -209,6 +253,7 @@ const GridLayoutComponent: React.FC = () => {
                     newCharts[index].x = x;
                     newCharts[index].y = y;
                     setCharts(newCharts);
+                    onUpdateCharts(newCharts);
                   }}
                 />
               )}
@@ -216,6 +261,14 @@ const GridLayoutComponent: React.FC = () => {
           </ResizableBox>
         </Draggable>
       ))}
+      <DashboardTemplates
+        templates={templates}
+        onLoadTemplate={handleLoadTemplate}
+        onImportTemplate={handleImportTemplate}
+        onDeleteTemplate={handleDeleteTemplate}
+        onRenameTemplate={handleRenameTemplate}
+        onSaveTemplate={handleSaveAsTemplate}
+      />
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import GridLayoutComponent from './GridLayoutComponent';
+import { DashboardItem } from './DashboardItemTypes';
 
 interface Dashboard {
   id: string;
@@ -10,11 +11,28 @@ interface DashboardManagerProps {
   onTitleChange: (title: string) => void;
 }
 
+export interface DashboardState {
+  charts: DashboardItem[];
+  selectedDataTypes: { [key: string]: string };
+}
+
 const DashboardManager: React.FC<DashboardManagerProps> = ({ onTitleChange }) => {
   const [dashboards, setDashboards] = useState<Dashboard[]>([
-    { id: '1', name: 'Dashboard' }
+    { id: '1', name: 'Dashboard 1' }
   ]);
   const [selectedDashboard, setSelectedDashboard] = useState<string>('1');
+  const [dashboardStates, setDashboardStates] = useState<{ [key: string]: DashboardState }>({
+    '1': {
+      charts: [],
+      selectedDataTypes: {
+        Left_Front_Wheel: '',
+        Right_Front_Wheel: '',
+        Left_Back_Wheel: '',
+        Right_Back_Wheel: '',
+        Battery: ''
+      }
+    }
+  });
 
   const addDashboard = () => {
     const newId = (dashboards.length + 1).toString();
@@ -22,6 +40,19 @@ const DashboardManager: React.FC<DashboardManagerProps> = ({ onTitleChange }) =>
     setDashboards([...dashboards, newDashboard]);
     setSelectedDashboard(newId);
     onTitleChange(newDashboard.name);
+    setDashboardStates((prev) => ({
+      ...prev,
+      [newId]: {
+        charts: [],
+        selectedDataTypes: {
+          Left_Front_Wheel: '',
+          Right_Front_Wheel: '',
+          Left_Back_Wheel: '',
+          Right_Back_Wheel: '',
+          Battery: ''
+        }
+      }
+    }));
   };
 
   const deleteDashboard = (id: string) => {
@@ -34,21 +65,51 @@ const DashboardManager: React.FC<DashboardManagerProps> = ({ onTitleChange }) =>
     } else if (newDashboards.length === 0) {
       addDashboard(); // Ensure there's always at least one dashboard
     }
+    setDashboardStates((prev) => {
+      const { [id]: _, ...rest } = prev;
+      return rest;
+    });
   };
 
-  const renameDashboard = (id: string, newName: string) => {
-    const newDashboards = dashboards.map(dashboard =>
-      dashboard.id === id ? { ...dashboard, name: newName } : dashboard
-    );
-    setDashboards(newDashboards);
-    if (selectedDashboard === id) {
-      onTitleChange(newName);
+  const renameDashboard = (oldDashboardId: string, newDashboardId: string) => {
+    const dashboardState = dashboardStates[oldDashboardId];
+    if (dashboardState) {
+      setDashboardStates((prev) => {
+        const { [oldDashboardId]: _, ...rest } = prev;
+        return {
+          ...rest,
+          [newDashboardId]: dashboardState
+        };
+      });
+      setDashboards((prev) => {
+        return prev.map(dashboard => dashboard.id === oldDashboardId ? { ...dashboard, id: newDashboardId, name: newDashboardId } : dashboard);
+      });
     }
   };
 
   const handleSelectDashboard = (id: string, name: string) => {
     setSelectedDashboard(id);
     onTitleChange(name);
+  };
+
+  const handleUpdateCharts = (dashboardId: string, charts: DashboardItem[]) => {
+    setDashboardStates((prev) => ({
+      ...prev,
+      [dashboardId]: {
+        ...prev[dashboardId],
+        charts
+      }
+    }));
+  };
+
+  const handleUpdateSelectedDataTypes = (dashboardId: string, selectedDataTypes: { [key: string]: string }) => {
+    setDashboardStates((prev) => ({
+      ...prev,
+      [dashboardId]: {
+        ...prev[dashboardId],
+        selectedDataTypes
+      }
+    }));
   };
 
   return (
@@ -87,8 +148,14 @@ const DashboardManager: React.FC<DashboardManagerProps> = ({ onTitleChange }) =>
         </button>
       </div>
       {dashboards.map(dashboard => (
-        dashboard.id === selectedDashboard && (
-          <GridLayoutComponent key={dashboard.id} />
+        dashboard.id === selectedDashboard && dashboardStates[dashboard.id] && (
+          <GridLayoutComponent
+            key={dashboard.id}
+            charts={dashboardStates[dashboard.id].charts}
+            selectedDataTypes={dashboardStates[dashboard.id].selectedDataTypes}
+            onUpdateCharts={(charts) => handleUpdateCharts(dashboard.id, charts)}
+            onUpdateSelectedDataTypes={(selectedDataTypes) => handleUpdateSelectedDataTypes(dashboard.id, selectedDataTypes)}
+          />
         )
       ))}
     </div>
