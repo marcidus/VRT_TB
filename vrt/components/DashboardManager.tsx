@@ -90,21 +90,15 @@ const DashboardManager: React.FC<DashboardManagerProps> = ({ onTitleChange }) =>
   /**
    * Renames a dashboard by its ID.
    * @param oldDashboardId - The old ID of the dashboard to rename.
-   * @param newDashboardId - The new ID of the dashboard.
+   * @param newDashboardName - The new name of the dashboard.
    */
-  const renameDashboard = (oldDashboardId: string, newDashboardId: string) => {
-    const dashboardState = dashboardStates[oldDashboardId];
-    if (dashboardState) {
-      setDashboardStates((prev) => {
-        const { [oldDashboardId]: _, ...rest } = prev;
-        return {
-          ...rest,
-          [newDashboardId]: dashboardState
-        };
-      });
-      setDashboards((prev) => {
-        return prev.map(dashboard => dashboard.id === oldDashboardId ? { ...dashboard, id: newDashboardId, name: newDashboardId } : dashboard);
-      });
+  const renameDashboard = (oldDashboardId: string, newDashboardName: string) => {
+    const newDashboards = dashboards.map(dashboard =>
+      dashboard.id === oldDashboardId ? { ...dashboard, name: newDashboardName } : dashboard
+    );
+    setDashboards(newDashboards);
+    if (selectedDashboard === oldDashboardId) {
+      onTitleChange(newDashboardName);
     }
   };
 
@@ -170,6 +164,7 @@ const DashboardManager: React.FC<DashboardManagerProps> = ({ onTitleChange }) =>
                   deleteDashboard(dashboard.id);
                 }}
                 className="ml-2 bg-red-500 text-white rounded px-2 hover:bg-red-700 transition-colors"
+                disabled={dashboard.id === '1'} // Ensure the delete button is disabled for the first dashboard
               >
                 X
               </button>
