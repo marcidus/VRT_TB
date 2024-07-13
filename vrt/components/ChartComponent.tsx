@@ -27,7 +27,10 @@ const ChartComponent: React.FC<ChartComponentProps> = ({ displayData, yAxisRange
       <LineChart data={displayData}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="x" />
-        <YAxis domain={[yAxisRange.min, yAxisRange.max]} tickFormatter={(value) => Math.round(value)} />
+        <YAxis 
+          domain={[yAxisRange.min, yAxisRange.max]} 
+          tickFormatter={(value) => Math.round(value).toString()} // Updated this line
+        />
         <Tooltip />
         <Legend />
         <Line type="monotone" dataKey="y" stroke="#8884d8" activeDot={{ r: 8 }} />

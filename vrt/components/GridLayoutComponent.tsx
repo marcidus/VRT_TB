@@ -4,9 +4,9 @@ import BarChartContainer from './Charts/BarChartContainer';
 import PieChartContainer from './Charts/PieChartContainer';
 import AddChartForm from './AddChartForm';
 import CarDataDisplay from './Charts/CarDataDisplay';
-import Draggable from 'react-draggable';
-import { ResizableBox } from 'react-resizable';
-import HeaderToggleButton from './HeaderToggleButton'; // Ensure to import HeaderToggleButton
+import Draggable, { DraggableEvent, DraggableData } from 'react-draggable'; // Ensure DraggableEvent and DraggableData are imported
+import { ResizableBox, ResizableBoxProps, ResizeCallbackData } from 'react-resizable'; // Ensure ResizableBoxProps and ResizeCallbackData are imported
+import HeaderToggleButton from './HeaderToggleButton';
 import 'react-resizable/css/styles.css';
 
 interface ChartItem {
@@ -83,7 +83,7 @@ const GridLayoutComponent: React.FC = () => {
     }
   }, [headersUpdated]);
 
-  const toggleHeadersUpdated = (newState) => {
+  const toggleHeadersUpdated = (newState: boolean) => { // Explicitly type newState
     setHeadersUpdated(newState);
   };
 
@@ -129,17 +129,18 @@ const GridLayoutComponent: React.FC = () => {
     setCharts(newCharts);
   };
 
-  const handleDragStop = (e: any, data: any, index: number) => {
+  const handleDragStop = (e: DraggableEvent, data: DraggableData, index: number) => { // Explicitly type e and data
     const newCharts = [...charts];
     newCharts[index].x = data.x;
     newCharts[index].y = data.y;
     setCharts(newCharts);
   };
 
-  const handleResizeStop = (e: any, data: any, index: number) => {
+  const handleResizeStop = (e: React.SyntheticEvent<Element>, data: ResizeCallbackData, index: number) => { // Explicitly type e and data
+    const { size } = data;
     const newCharts = [...charts];
-    newCharts[index].width = data.size.width;
-    newCharts[index].height = data.size.height;
+    newCharts[index].width = size.width;
+    newCharts[index].height = size.height;
     setCharts(newCharts);
   };
 
@@ -152,7 +153,7 @@ const GridLayoutComponent: React.FC = () => {
 
   return (
     <div className="layout" style={{ position: 'relative', width: '100%', height: '100vh' }}>
-      <HeaderToggleButton headersUpdated={headersUpdated} toggleHeadersUpdated={toggleHeadersUpdated} /> {/* Ensure the toggle button is added */}
+      <HeaderToggleButton headersUpdated={headersUpdated} toggleHeadersUpdated={toggleHeadersUpdated} />
       <AddChartForm availableDataTypes={availableDataTypes} onAddChart={handleAddChart} />
       {charts.map((item, index) => (
         <Draggable
