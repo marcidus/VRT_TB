@@ -5,9 +5,9 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import Header from './Header';
-import ChartComponent from './ChartComponent';
-import YAxisRangeComponent from './YAxisRangeComponent';
+import Header from './common/Header';
+import ChartComponent from './common/ChartComponent';
+import YAxisRangeComponent from './common/YAxisRangeComponent';
 
 // Define the structure of a data point for the chart
 interface ChartDataPoint {

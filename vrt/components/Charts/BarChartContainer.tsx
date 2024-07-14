@@ -5,9 +5,9 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import Header from '../Header';
+import Header from './common/Header';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import YAxisRangeComponent from '../YAxisRangeComponent';
+import YAxisRangeComponent from './common/YAxisRangeComponent';
 import Draggable from 'react-draggable';
 import { Resizable } from "react-resizable";
 import 'react-resizable/css/styles.css';

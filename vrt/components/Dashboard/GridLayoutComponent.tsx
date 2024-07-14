@@ -5,11 +5,11 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import ChartContainer from './ChartContainer';
-import BarChartContainer from './Charts/BarChartContainer';
-import PieChartContainer from './Charts/PieChartContainer';
+import ChartContainer from '../Charts/ChartContainer';
+import BarChartContainer from '../Charts/BarChartContainer';
+import PieChartContainer from '../Charts/PieChartContainer';
 import AddChartForm from './AddChartForm';
-import CarDataDisplay from './Charts/CarDataDisplay';
+import CarDataDisplay from '../Charts/CarDataDisplay';
 import Draggable, { DraggableEvent, DraggableData } from 'react-draggable';
 import { ResizableBox, ResizeCallbackData } from 'react-resizable';
 import HeaderToggleButton from './HeaderToggleButton';

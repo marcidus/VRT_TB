@@ -4,7 +4,7 @@
  *              into the ChartDataPoint format.
  */
 
-import { ChartDataPoint } from './chartComponentTypes';
+import { ChartDataPoint } from '../Charts/types/chartComponentTypes';
 
 /**
  * Fetches data for a specific sensor from the API.

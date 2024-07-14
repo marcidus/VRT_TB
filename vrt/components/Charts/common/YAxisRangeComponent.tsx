@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import Popup from './Popup';
+import Popup from '../../Shared/Popup';
 
 // Props for the YAxisRangeComponent
 interface YAxisRangeComponentProps {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import DashboardManager from '../components/DashboardManager';
+import DashboardManager from '../components/Dashboard/DashboardManager';
 
 const Dashboard: React.FC = () => {
   const [title, setTitle] = useState<string>('Dashboard');

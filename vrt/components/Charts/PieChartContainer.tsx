@@ -5,7 +5,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import Header from '../Header';
+import Header from './common/Header';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 import Draggable from 'react-draggable';
 import { Resizable } from "react-resizable";
