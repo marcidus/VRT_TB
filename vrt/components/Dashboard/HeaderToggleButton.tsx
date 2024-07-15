@@ -1,11 +1,5 @@
-/**
- * Author: Alexandre Martroye de Joly
- * Description: This component provides a toggle button to enable or disable header updates. It fetches the initial state
- *              of header updates from the server and ensures the parent component's state is in sync with this initial state.
- *              The button's appearance and label change based on whether header updates are enabled or disabled.
- */
-
 import React, { useState, useEffect } from 'react';
+import { DataService } from '../Data/DataService'; // Import DataService
 
 // Props for the HeaderToggleButton component
 interface HeaderToggleButtonProps {
@@ -19,29 +13,24 @@ const HeaderToggleButton: React.FC<HeaderToggleButtonProps> = ({ headersUpdated,
   // Fetch the initial state of headersUpdated from the server when the component mounts
   useEffect(() => {
     console.log('Fetching initial headersUpdated state');
-    fetch('http://localhost:3001/headers-updated')
-      .then(response => response.json())
+    const dataService = DataService.getInstance();
+    dataService.fetchHeadersUpdated()
       .then(data => {
-        console.log('Received headersUpdated state:', data.headersUpdated);
-        setInitialHeadersUpdated(data.headersUpdated);
-        toggleHeadersUpdated(data.headersUpdated); // Ensure parent state is in sync with initial state
+        console.log('Received headersUpdated state:', data);
+        setInitialHeadersUpdated(data);
+        toggleHeadersUpdated(data); // Ensure parent state is in sync with initial state
       })
       .catch(error => console.error('Error fetching headersUpdated state:', error));
-  }, []);
+  }, [toggleHeadersUpdated]);
 
   // Handle the toggle button click event
   const handleToggle = () => {
     console.log('Toggling headersUpdated state');
-    fetch('http://localhost:3001/toggle-headers-updated', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-      .then(response => response.json())
+    const dataService = DataService.getInstance();
+    dataService.toggleHeadersUpdated()
       .then(data => {
-        console.log('Received toggled headersUpdated state:', data.headersUpdated);
-        toggleHeadersUpdated(data.headersUpdated);
+        console.log('Received toggled headersUpdated state:', data);
+        toggleHeadersUpdated(data);
       })
       .catch(error => console.error('Error toggling headersUpdated state:', error));
   };

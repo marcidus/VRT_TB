@@ -1,26 +1,16 @@
-/**
- * Author: Alexandre Martroye de Joly
- * Description: This component calculates and sets the Y-axis range for a chart based on the median of the data.
- *              It includes a slider to adjust the percentage range around the median and displays a popup message
- *              if a data spike is detected outside the calculated range.
- */
-
 import React, { useState, useEffect } from 'react';
 import Popup from '../../Shared/Popup';
 
-// Props for the YAxisRangeComponent
 interface YAxisRangeComponentProps {
-  data: { x: string, y: number }[]; // The data points to be displayed on the chart
-  displayDataPoints: number; // The number of data points to be displayed on the chart
-  onRangeChange: (filteredData: { x: string, y: number }[], min: number, max: number) => void; // Callback to handle range changes
-  onSpikeDetected: (spike: { x: string, y: number }) => void; // Callback to handle detected spikes
+  data: { x: string, y: number }[];
+  displayDataPoints: number;
+  onRangeChange: (filteredData: { x: string, y: number }[], min: number, max: number) => void;
+  onSpikeDetected: (spike: { x: string, y: number }) => void;
 }
 
-// Utility function to calculate the median of an array of numbers
 const calculateMedian = (values: number[]): number => {
   values.sort((a, b) => a - b);
   const middle = Math.floor(values.length / 2);
-
   if (values.length % 2 === 0) {
     return (values[middle - 1] + values[middle]) / 2;
   } else {
@@ -49,6 +39,8 @@ const YAxisRangeComponent: React.FC<YAxisRangeComponentProps> = ({
     const min = Math.floor((median - range) / 10) * 10;
     const max = Math.ceil((median + range) / 10) * 10;
 
+    console.log(`Median: ${median}, Range: ${range}, Min: ${min}, Max: ${max}`); // Debugging output
+
     if (yAxisRange === null || yAxisRange.min !== min || yAxisRange.max !== max) {
       const filteredData = relevantData.filter(point => {
         const isSpike = point.y < min || point.y > max;
@@ -69,10 +61,13 @@ const YAxisRangeComponent: React.FC<YAxisRangeComponentProps> = ({
       const timer = setTimeout(() => {
         setPopupMessage(null);
       }, 3000);
-
       return () => clearTimeout(timer);
     }
   }, [popupMessage]);
+
+  const handlePercentageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPercentage(parseInt(e.target.value));
+  };
 
   return (
     <div>
@@ -82,7 +77,7 @@ const YAxisRangeComponent: React.FC<YAxisRangeComponentProps> = ({
         min="1"
         max="100"
         value={percentage}
-        onChange={(e) => setPercentage(parseInt(e.target.value))}
+        onChange={handlePercentageChange}
       />
       {popupMessage && <Popup message={popupMessage} />}
     </div>

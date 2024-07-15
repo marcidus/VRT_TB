@@ -1,181 +1,107 @@
-/**
- * Author: Alexandre Martroye de Joly
- * Description: This component renders a draggable and resizable bar chart that receives real-time data updates
- *              from a server. It also includes a header for settings and a component for adjusting the Y-axis range.
- */
-
-import React, { useEffect, useState } from 'react';
-import Header from './common/Header';
+import React, { useState, useEffect } from 'react';
+import LatestDataComponent from '../Data/LatestDataComponent';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import Header from './common/Header';
 import YAxisRangeComponent from './common/YAxisRangeComponent';
 import Draggable from 'react-draggable';
-import { Resizable } from "react-resizable";
+import { Resizable } from 'react-resizable';
 import 'react-resizable/css/styles.css';
-
-// Define the structure of a data point for the chart
-interface ChartDataPoint {
-  x: string;
-  y: number;
-}
-
-// Define the props for the BarChartContainer component
-interface BarChartContainerProps {
-  dataType: string;
-  title: string;
-  onDataTypeChange: (newDataType: string) => void;
-  availableDataTypes: string[];
-  onDelete: () => void;
-}
-
-// Initialize an empty array for the initial data
-const initialData: ChartDataPoint[] = [];
-
-/**
- * Helper function to truncate the timestamp to a more manageable format.
- * @param timestamp - The original timestamp string.
- * @returns A truncated timestamp string.
- */
-const truncateTimestamp = (timestamp: string): string => {
-  try {
-    const [datePart, fractionalPart] = timestamp.split('.');
-    if (fractionalPart) {
-      const truncatedFractionalPart = fractionalPart.slice(0, 3);
-      return `${datePart}.${truncatedFractionalPart}Z`;
-    }
-    return timestamp;
-  } catch (error) {
-    console.error('Error truncating timestamp:', error);
-    return timestamp;
-  }
-};
+import { BarChartContainerProps, BarChartDataPoint } from './types/chartComponentTypes';
 
 const BarChartContainer: React.FC<BarChartContainerProps> = ({
   dataType,
   title,
   onDataTypeChange,
   availableDataTypes,
-  onDelete
+  onDelete,
 }) => {
-  const [data, setData] = useState<ChartDataPoint[]>(initialData); // State to hold all the chart data points
-  const [displayData, setDisplayData] = useState<ChartDataPoint[]>(initialData); // State to hold the displayed chart data points
-  const [dataPoints, setDataPoints] = useState<number>(10); // State to manage the number of displayed data points
-  const [width, setWidth] = useState<number>(400); // State to manage the width of the chart container
-  const [height, setHeight] = useState<number>(400); // State to manage the height of the chart container
-  const [yAxisRange, setYAxisRange] = useState<{ min: number, max: number }>({ min: 0, max: 100 }); // State to manage the Y-axis range
+  const [data, setData] = useState<BarChartDataPoint[]>([]);
+  const [displayData, setDisplayData] = useState<BarChartDataPoint[]>([]);
+  const [dataPoints, setDataPoints] = useState<number>(10);
+  const [width, setWidth] = useState<number>(400);
+  const [height, setHeight] = useState<number>(400);
+  const [yAxisRange, setYAxisRange] = useState<{ min: number, max: number }>({ min: 0, max: 100 });
 
-  // Effect to handle incoming data from the server
+  // Effect to update the displayed data when data, dataPoints, or offset change
   useEffect(() => {
-    setData(initialData);
-
-    // Initialize the EventSource to receive real-time data
-    const eventSource = new EventSource('http://localhost:3001/events');
-
-    // Event listener for incoming messages
-    eventSource.onmessage = (event) => {
-      try {
-        const newData = JSON.parse(event.data);
-        const decodedData = atob(newData.data);
-        const parsedData = JSON.parse(decodedData);
-
-        // Check if the received data contains the specified dataType
-        if (parsedData[dataType] !== undefined) {
-          const truncatedTimestamp = truncateTimestamp(newData.timestamp);
-          if (isNaN(Date.parse(truncatedTimestamp))) {
-            return;
-          }
-
-          const newValue = parseFloat(parsedData[dataType]);
-
-          setData((prevData) => {
-            const updatedData = [...prevData, { x: truncatedTimestamp, y: newValue }];
-
-            // Limit the number of data points to 100
-            if (updatedData.length > 100) {
-              updatedData.shift();
-            }
-
-            return updatedData;
-          });
-        }
-      } catch (error) {
-        console.error('Error processing SSE message:', error);
-      }
-    };
-
-    // Error event listener
-    eventSource.onerror = (error) => {
-      console.error('SSE error:', error);
-    };
-
-    // Cleanup the EventSource on component unmount
-    return () => eventSource.close();
-  }, [dataType]);
-
-  // Effect to update the displayed data when data or dataPoints change
-  useEffect(() => {
-    setDisplayData(data.slice(-dataPoints));
+    const start = Math.max(0, data.length - dataPoints);
+    const end = data.length;
+    setDisplayData(data.slice(start, end));
   }, [data, dataPoints]);
 
-  /**
-   * Handler for changing the Y-axis range.
-   * @param filteredData - The filtered data points within the new range.
-   * @param min - The new minimum value of the Y-axis range.
-   * @param max - The new maximum value of the Y-axis range.
-   */
   const handleRangeChange = (filteredData: { x: string, y: number }[], min: number, max: number) => {
-    setDisplayData(filteredData);
     setYAxisRange({ min, max });
+    setDisplayData(filteredData);
   };
 
-  /**
-   * Handler for detecting spikes in the data.
-   * @param spike - The data point where a spike is detected.
-   */
   const handleSpikeDetected = (spike: { x: string, y: number }) => {
     console.log('Spike detected:', spike);
   };
 
+  const handleDataPointsChange = (newDataPoints: number) => {
+    setDataPoints(newDataPoints);
+  };
+
   return (
-    <Draggable handle=".handle-bar">
-      <Resizable
-        width={width}
-        height={height}
-        onResize={(e, { size }) => {
-          setWidth(size.width);
-          setHeight(size.height);
-        }}
-      >
-        <div className="border-2 border-gray-400 rounded shadow p-2" style={{ width, height }}>
-          <Header
-            title={title}
-            dataType={dataType}
-            onDataTypeChange={onDataTypeChange}
-            availableDataTypes={availableDataTypes}
-            dataPoints={dataPoints}
-            onDataPointsChange={setDataPoints}
-          />
-          <YAxisRangeComponent
-            data={data}
-            displayDataPoints={dataPoints}
-            onRangeChange={handleRangeChange}
-            onSpikeDetected={handleSpikeDetected}
-          />
-          <ResponsiveContainer width="100%" height={400}>
-            <BarChart data={displayData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="x" />
-              <YAxis domain={[yAxisRange.min, yAxisRange.max]} />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="y" fill="#8884d8" />
-            </BarChart>
-          </ResponsiveContainer>
-          <button onClick={onDelete} className="bg-red-500 text-white rounded px-4 py-2 mt-2">
-            Delete
-          </button>
-        </div>
-      </Resizable>
-    </Draggable>
+    <LatestDataComponent dataType={dataType}>
+      {(latestData) => {
+        if (latestData) {
+          // Ensure we don't re-render the component unnecessarily
+          if (!data.some(d => d.x === latestData.timestamp)) {
+            setData((prevData) => {
+              const updatedData = [...prevData, { x: latestData.timestamp, y: latestData.value }];
+              if (updatedData.length > 100) {
+                updatedData.shift();
+              }
+              return updatedData;
+            });
+          }
+        }
+
+        return (
+          <Draggable handle=".handle-bar">
+            <Resizable
+              width={width}
+              height={height}
+              onResize={(e, { size }) => {
+                setWidth(size.width);
+                setHeight(size.height);
+              }}
+            >
+              <div className="border-2 border-gray-400 rounded shadow p-2" style={{ width, height }}>
+                <Header
+                  title={title}
+                  dataType={dataType}
+                  onDataTypeChange={onDataTypeChange}
+                  availableDataTypes={availableDataTypes}
+                  dataPoints={dataPoints}
+                  onDataPointsChange={handleDataPointsChange}
+                />
+                <YAxisRangeComponent
+                  data={data}
+                  displayDataPoints={dataPoints}
+                  onRangeChange={handleRangeChange}
+                  onSpikeDetected={handleSpikeDetected}
+                />
+                <ResponsiveContainer width="100%" height={400}>
+                  <BarChart data={displayData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="x" />
+                    <YAxis domain={[yAxisRange.min, yAxisRange.max]} />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="y" fill="#8884d8" />
+                  </BarChart>
+                </ResponsiveContainer>
+                <button onClick={onDelete} className="bg-red-500 text-white rounded px-4 py-2 mt-2">
+                  Delete
+                </button>
+              </div>
+            </Resizable>
+          </Draggable>
+        );
+      }}
+    </LatestDataComponent>
   );
 };
 

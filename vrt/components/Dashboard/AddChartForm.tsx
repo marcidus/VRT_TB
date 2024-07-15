@@ -1,40 +1,28 @@
-/**
- * Author: Alexandre Martroye de Joly
- * Description: This component provides a form for adding new charts to a dashboard. Users can select the chart title,
- *              data type, and chart type (line, bar, or car). The form updates dynamically based on available data types
- *              and resets after submission.
- */
-
 import React, { useState, useEffect } from 'react';
 
-// Define the props for the AddChartForm component
 interface AddChartFormProps {
   availableDataTypes: string[];
   onAddChart: (title: string, dataType: string, chartType: 'line' | 'bar' | 'car') => void;
 }
 
 const AddChartForm: React.FC<AddChartFormProps> = ({ availableDataTypes, onAddChart }) => {
-  const [title, setTitle] = useState(''); // State to manage the title of the chart
-  const [dataType, setDataType] = useState(availableDataTypes[0] || ''); // State to manage the selected data type
-  const [chartType, setChartType] = useState<'line' | 'bar' | 'car'>('line'); // State to manage the selected chart type
+  const [title, setTitle] = useState(''); 
+  const [dataType, setDataType] = useState(availableDataTypes[0] || ''); 
+  const [chartType, setChartType] = useState<'line' | 'bar' | 'car'>('line'); 
 
-  // Effect to update the selected data type when available data types change
   useEffect(() => {
     if (availableDataTypes.length > 0 && !dataType) {
       setDataType(availableDataTypes[0]);
     }
   }, [availableDataTypes]);
 
-  /**
-   * Handler for form submission.
-   * @param e - The form submission event.
-   */
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Adding chart:", { title, dataType, chartType }); // Debug log
     onAddChart(title, dataType, chartType);
-    setTitle(''); // Reset title input
-    setDataType(availableDataTypes[0] || ''); // Reset data type to the first available option
-    setChartType('line'); // Reset chart type to default
+    setTitle('');
+    setDataType(availableDataTypes[0] || '');
+    setChartType('line');
   };
 
   return (
@@ -47,7 +35,7 @@ const AddChartForm: React.FC<AddChartFormProps> = ({ availableDataTypes, onAddCh
           onChange={(e) => setTitle(e.target.value)}
           className="border rounded p-1"
           required
-          disabled={chartType === 'car'} // Disable title input for car data display
+          disabled={chartType === 'car'}
         />
       </div>
       <div className="mb-2">
@@ -57,7 +45,7 @@ const AddChartForm: React.FC<AddChartFormProps> = ({ availableDataTypes, onAddCh
           onChange={(e) => setDataType(e.target.value)}
           className="border rounded p-1"
           required
-          disabled={chartType === 'car'} // Disable data type input for car data display
+          disabled={chartType === 'car'}
         >
           {availableDataTypes.map((type) => (
             <option key={type} value={type}>

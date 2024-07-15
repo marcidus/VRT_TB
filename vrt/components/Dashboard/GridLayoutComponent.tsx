@@ -1,9 +1,3 @@
-/**
- * Author: Alexandre Martroye de Joly
- * Description: This component manages the layout of the dashboard, including adding, deleting, resizing, and dragging
- *              charts. It also handles saving, loading, importing, and exporting dashboard templates.
- */
-
 import React, { useState, useEffect } from 'react';
 import ChartContainer from '../Charts/ChartContainer';
 import BarChartContainer from '../Charts/BarChartContainer';
@@ -38,10 +32,8 @@ const GridLayoutComponent: React.FC<GridLayoutComponentProps> = ({ charts: initi
 
   const [selectedDataTypes, setSelectedDataTypes] = useState<{ [key: string]: string }>(initialSelectedDataTypes);
   const [templates, setTemplates] = useState<{ [key: string]: DashboardItem[] }>({});
-
   const [headersUpdated, setHeadersUpdated] = useState(false);
 
-  // Fetch available data types from the server
   const fetchHeaders = async () => {
     try {
       const response = await fetch('http://localhost:3001/data-types');
@@ -68,23 +60,19 @@ const GridLayoutComponent: React.FC<GridLayoutComponentProps> = ({ charts: initi
     }
   }, [headersUpdated]);
 
-  // Load templates from local storage when the component mounts
   useEffect(() => {
     const savedTemplates = JSON.parse(localStorage.getItem('dashboardTemplates') || '{}');
     setTemplates(savedTemplates);
   }, []);
 
-  // Save templates to local storage when they change
   useEffect(() => {
     localStorage.setItem('dashboardTemplates', JSON.stringify(templates));
   }, [templates]);
 
-  // Toggle the state of headersUpdated
   const toggleHeadersUpdated = (newState: boolean) => {
     setHeadersUpdated(newState);
   };
 
-  // Handle changing the data type of a chart
   const handleDataTypeChange = (index: number, newDataType: string) => {
     const newCharts = [...charts];
     const chart = newCharts[index] as ChartItem;
@@ -97,7 +85,6 @@ const GridLayoutComponent: React.FC<GridLayoutComponentProps> = ({ charts: initi
     onUpdateCharts(newCharts);
   };
 
-  // Handle adding a new chart
   const handleAddChart = (title: string, dataType: string, chartType: 'line' | 'bar' | 'car') => {
     let newItem: DashboardItem;
     if (chartType === 'car') {
@@ -126,14 +113,12 @@ const GridLayoutComponent: React.FC<GridLayoutComponentProps> = ({ charts: initi
     onUpdateCharts(newCharts);
   };
 
-  // Handle deleting a chart
   const handleDeleteChart = (index: number) => {
     const newCharts = charts.filter((_, i) => i !== index);
     setCharts(newCharts);
     onUpdateCharts(newCharts);
   };
 
-  // Handle dragging a chart
   const handleDragStop = (e: DraggableEvent, data: DraggableData, index: number) => {
     const newCharts = [...charts];
     newCharts[index].x = data.x;
@@ -142,7 +127,6 @@ const GridLayoutComponent: React.FC<GridLayoutComponentProps> = ({ charts: initi
     onUpdateCharts(newCharts);
   };
 
-  // Handle resizing a chart
   const handleResizeStop = (e: React.SyntheticEvent<Element>, data: ResizeCallbackData, index: number) => {
     const { size } = data;
     const newCharts = [...charts];
@@ -152,7 +136,6 @@ const GridLayoutComponent: React.FC<GridLayoutComponentProps> = ({ charts: initi
     onUpdateCharts(newCharts);
   };
 
-  // Handle changing the data type of a car data display
   const handleCarDataTypeChange = (position: string, newDataType: string) => {
     const newSelectedDataTypes = {
       ...selectedDataTypes,
@@ -162,7 +145,6 @@ const GridLayoutComponent: React.FC<GridLayoutComponentProps> = ({ charts: initi
     onUpdateSelectedDataTypes(newSelectedDataTypes);
   };
 
-  // Handle saving the current charts as a template
   const handleSaveAsTemplate = (templateName: string) => {
     setTemplates((prev) => ({
       ...prev,
@@ -170,7 +152,6 @@ const GridLayoutComponent: React.FC<GridLayoutComponentProps> = ({ charts: initi
     }));
   };
 
-  // Handle loading a template
   const handleLoadTemplate = (templateName: string) => {
     const templateCharts = templates[templateName];
     if (templateCharts) {
@@ -179,7 +160,6 @@ const GridLayoutComponent: React.FC<GridLayoutComponentProps> = ({ charts: initi
     }
   };
 
-  // Handle importing a template
   const handleImportTemplate = (templateName: string, importedCharts: DashboardItem[]) => {
     setTemplates((prev) => ({
       ...prev,
@@ -187,7 +167,6 @@ const GridLayoutComponent: React.FC<GridLayoutComponentProps> = ({ charts: initi
     }));
   };
 
-  // Handle deleting a template
   const handleDeleteTemplate = (templateName: string) => {
     setTemplates((prev) => {
       const { [templateName]: _, ...rest } = prev;
@@ -195,7 +174,6 @@ const GridLayoutComponent: React.FC<GridLayoutComponentProps> = ({ charts: initi
     });
   };
 
-  // Handle renaming a template
   const handleRenameTemplate = (oldTemplateName: string, newTemplateName: string) => {
     const templateCharts = templates[oldTemplateName];
     if (templateCharts) {
@@ -209,12 +187,10 @@ const GridLayoutComponent: React.FC<GridLayoutComponentProps> = ({ charts: initi
     }
   };
 
-  // Set initial charts when the component mounts or when initialCharts prop changes
   useEffect(() => {
     setCharts(initialCharts);
   }, [initialCharts]);
 
-  // Set initial selected data types when the component mounts or when initialSelectedDataTypes prop changes
   useEffect(() => {
     setSelectedDataTypes(initialSelectedDataTypes);
   }, [initialSelectedDataTypes]);
@@ -267,7 +243,7 @@ const GridLayoutComponent: React.FC<GridLayoutComponentProps> = ({ charts: initi
               )}
               {'type' in item && item.type === 'car' && (
                 <CarDataDisplay
-                  data={carData}
+                  data={carData} // Provide the carData prop here
                   onDelete={() => handleDeleteChart(index)}
                   availableDataTypes={availableDataTypes}
                   onDataTypeChange={handleCarDataTypeChange}
