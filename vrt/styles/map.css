@@ -1,8 +1,6 @@
 .map {
   width: 600px;
   height: 400px;
-  border: 2px solid black;
-  border-radius: 25px;
   background: transparent;
 }
 
@@ -11,6 +9,10 @@
   height: 400px;
   border-radius: 25px;
   background: transparent;
+}
+
+.map-container {
+  width: 600px;
 }
 
 
