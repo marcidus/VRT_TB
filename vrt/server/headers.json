@@ -1,0 +1,23 @@
+[
+  "Left_Engine_Temp",
+  "Right_Engine_Temp",
+  "Left_Inverter_Temperature",
+  "Right_Inverter_Temperature",
+  "Right_Gearbox_Temp",
+  "Right_Radiator_Temp",
+  "Left_Gearbox_Temp",
+  "Brake_Pedal",
+  "Accelerator_Pedal",
+  "Raw_Direction",
+  "lat",
+  "lon",
+  "Left_Radiator_Temp",
+  "Car_Speed",
+  "GSPSpeed",
+  "Suspension_Back_Left",
+  "Suspension_Back_Right",
+  "Suspension_Front_Left",
+  "Suspension_Front_Right",
+  "GPSCoords",
+  "Flag"
+]
