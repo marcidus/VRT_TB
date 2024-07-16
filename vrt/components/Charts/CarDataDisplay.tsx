@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Draggable from 'react-draggable';
 import { Resizable } from 'react-resizable';
 import 'react-resizable/css/styles.css';
 import { FaCar, FaTrash } from 'react-icons/fa';
 import LatestDataComponent from '../Data/LatestDataComponent';
 import { CarDataDisplayProps } from './types/chartComponentTypes';
-import { DataService } from '../Data/DataService'; // Import DataService
+import { DataService } from '../Data/DataService';
 
 const CarDataDisplay: React.FC<CarDataDisplayProps> = ({
   onDelete,
@@ -32,6 +32,21 @@ const CarDataDisplay: React.FC<CarDataDisplayProps> = ({
     Battery: { x: 175, y: 275 },
   });
 
+  useEffect(() => {
+    // Subscribe to the initial data types
+    const dataService = DataService.getInstance();
+    Object.keys(selectedDataTypes).forEach((key) => {
+      dataService.subscribe(selectedDataTypes[key], () => {});
+    });
+
+    return () => {
+      // Unsubscribe from all data types on unmount
+      Object.keys(selectedDataTypes).forEach((key) => {
+        dataService.unsubscribe(selectedDataTypes[key], () => {});
+      });
+    };
+  }, [selectedDataTypes]);
+
   const handleLabelChange = (key: string, newLabel: string) => {
     setLabels({ ...labels, [key]: newLabel });
   };
@@ -40,7 +55,9 @@ const CarDataDisplay: React.FC<CarDataDisplayProps> = ({
     const newKey = `Label_${Object.keys(labels).length + 1}`;
     setLabels({ ...labels, [newKey]: 'New Label' });
     setPositions({ ...positions, [newKey]: { x: 200, y: 300 } });
-    onDataTypeChange(newKey, availableDataTypes[0]);
+    const initialDataType = availableDataTypes[0];
+    onDataTypeChange(newKey, initialDataType);
+    DataService.getInstance().subscribe(initialDataType, () => {});
   };
 
   const handleDeleteLabel = (key: string) => {
@@ -140,7 +157,14 @@ const CarDataDisplay: React.FC<CarDataDisplayProps> = ({
                       </div>
                       <select
                         value={selectedDataTypes[key]}
-                        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => onDataTypeChange(key, e.target.value)}
+                        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                          const newDataType = e.target.value;
+                          onDataTypeChange(key, newDataType);
+
+                          // Subscribe to the new data type
+                          const dataService = DataService.getInstance();
+                          dataService.subscribe(newDataType, () => {});
+                        }}
                         className="ml-2 bg-white border border-gray-300 rounded"
                         style={{ width: '100px', marginBottom: '2px' }}
                       >

@@ -96,6 +96,15 @@ const GridLayoutComponent: React.FC<GridLayoutComponentProps> = ({ charts: initi
         width: 400,
         height: 600,
       } as CarDataItem;
+      // Initialize selectedDataTypes with the first available data type
+      setSelectedDataTypes((prevSelectedDataTypes) => ({
+        ...prevSelectedDataTypes,
+        Left_Front_Wheel: availableDataTypes[0],
+        Right_Front_Wheel: availableDataTypes[0],
+        Left_Back_Wheel: availableDataTypes[0],
+        Right_Back_Wheel: availableDataTypes[0],
+        Battery: availableDataTypes[0],
+      }));
     } else {
       newItem = {
         id: (charts.length + 1).toString(),
@@ -112,6 +121,7 @@ const GridLayoutComponent: React.FC<GridLayoutComponentProps> = ({ charts: initi
     setCharts(newCharts);
     onUpdateCharts(newCharts);
   };
+  
 
   const handleDeleteChart = (index: number) => {
     const newCharts = charts.filter((_, i) => i !== index);
