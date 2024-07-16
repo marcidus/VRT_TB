@@ -9,12 +9,19 @@ export interface ChartItem {
   id: string; // Unique identifier for the chart item
   title: string; // Title of the chart
   dataType: string; // Data type that the chart represents
-  chartType: 'line' | 'bar' | 'pie'; // Type of the chart
+  chartType: 'line' | 'bar' | 'pie' | "car"; // Type of the chart
   x: number; // X-coordinate of the chart's position
   y: number; // Y-coordinate of the chart's position
   width: number; // Width of the chart
   height: number; // Height of the chart
 }
+
+// Define the Dashboard interface in a shared file
+export interface Dashboard {
+  id: string;
+  name: string;
+}
+
 
 // Interface to represent a car data item in the dashboard
 export interface CarDataItem {

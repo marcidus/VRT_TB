@@ -2,11 +2,9 @@ import React, { useState, useEffect } from 'react';
 import ChartContainer from '../Charts/ChartContainer';
 import BarChartContainer from '../Charts/BarChartContainer';
 import PieChartContainer from '../Charts/PieChartContainer';
-import AddChartForm from './AddChartForm';
 import CarDataDisplay from '../Charts/CarDataDisplay';
 import Draggable, { DraggableEvent, DraggableData } from 'react-draggable';
 import { ResizableBox, ResizeCallbackData } from 'react-resizable';
-import HeaderToggleButton from './HeaderToggleButton';
 import 'react-resizable/css/styles.css';
 import { CarDataItem, ChartItem, DashboardItem } from './DashboardItemTypes';
 import DashboardTemplates from './DashboardTemplates';
@@ -17,9 +15,30 @@ interface GridLayoutComponentProps {
   selectedDataTypes: { [key: string]: string };
   onUpdateCharts: (charts: DashboardItem[]) => void;
   onUpdateSelectedDataTypes: (selectedDataTypes: { [key: string]: string }) => void;
+  headersUpdated: boolean;
+  toggleHeadersUpdated: (newState: boolean) => void;
+  templates: { [key: string]: DashboardItem[] };
+  onLoadTemplate: (templateName: string) => void;
+  onImportTemplate: (templateName: string, importedCharts: DashboardItem[]) => void;
+  onDeleteTemplate: (templateName: string) => void;
+  onRenameTemplate: (oldTemplateName: string, newTemplateName: string) => void;
+  onSaveTemplate: (templateName: string) => void;
 }
 
-const GridLayoutComponent: React.FC<GridLayoutComponentProps> = ({ charts: initialCharts, selectedDataTypes: initialSelectedDataTypes, onUpdateCharts, onUpdateSelectedDataTypes }) => {
+const GridLayoutComponent: React.FC<GridLayoutComponentProps> = ({
+  charts: initialCharts,
+  selectedDataTypes: initialSelectedDataTypes,
+  onUpdateCharts,
+  onUpdateSelectedDataTypes,
+  headersUpdated,
+  toggleHeadersUpdated,
+  templates,
+  onLoadTemplate,
+  onImportTemplate,
+  onDeleteTemplate,
+  onRenameTemplate,
+  onSaveTemplate
+}) => {
   const [charts, setCharts] = useState<DashboardItem[]>(initialCharts);
   const [availableDataTypes, setAvailableDataTypes] = useState<string[]>([]);
   const [carData, setCarData] = useState<{ [key: string]: number }>({
@@ -31,8 +50,6 @@ const GridLayoutComponent: React.FC<GridLayoutComponentProps> = ({ charts: initi
   });
 
   const [selectedDataTypes, setSelectedDataTypes] = useState<{ [key: string]: string }>(initialSelectedDataTypes);
-  const [templates, setTemplates] = useState<{ [key: string]: DashboardItem[] }>({});
-  const [headersUpdated, setHeadersUpdated] = useState(false);
 
   const fetchHeaders = async () => {
     try {
@@ -60,19 +77,6 @@ const GridLayoutComponent: React.FC<GridLayoutComponentProps> = ({ charts: initi
     }
   }, [headersUpdated]);
 
-  useEffect(() => {
-    const savedTemplates = JSON.parse(localStorage.getItem('dashboardTemplates') || '{}');
-    setTemplates(savedTemplates);
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem('dashboardTemplates', JSON.stringify(templates));
-  }, [templates]);
-
-  const toggleHeadersUpdated = (newState: boolean) => {
-    setHeadersUpdated(newState);
-  };
-
   const handleDataTypeChange = (index: number, newDataType: string) => {
     const newCharts = [...charts];
     const chart = newCharts[index] as ChartItem;
@@ -84,44 +88,6 @@ const GridLayoutComponent: React.FC<GridLayoutComponentProps> = ({ charts: initi
     setCharts(newCharts);
     onUpdateCharts(newCharts);
   };
-
-  const handleAddChart = (title: string, dataType: string, chartType: 'line' | 'bar' | 'car') => {
-    let newItem: DashboardItem;
-    if (chartType === 'car') {
-      newItem = {
-        id: (charts.length + 1).toString(),
-        type: 'car',
-        x: 0,
-        y: 0,
-        width: 400,
-        height: 600,
-      } as CarDataItem;
-      // Initialize selectedDataTypes with the first available data type
-      setSelectedDataTypes((prevSelectedDataTypes) => ({
-        ...prevSelectedDataTypes,
-        Left_Front_Wheel: availableDataTypes[0],
-        Right_Front_Wheel: availableDataTypes[0],
-        Left_Back_Wheel: availableDataTypes[0],
-        Right_Back_Wheel: availableDataTypes[0],
-        Battery: availableDataTypes[0],
-      }));
-    } else {
-      newItem = {
-        id: (charts.length + 1).toString(),
-        title,
-        dataType,
-        chartType,
-        x: 0,
-        y: 0,
-        width: 300,
-        height: 200,
-      } as ChartItem;
-    }
-    const newCharts = [...charts, newItem];
-    setCharts(newCharts);
-    onUpdateCharts(newCharts);
-  };
-  
 
   const handleDeleteChart = (index: number) => {
     const newCharts = charts.filter((_, i) => i !== index);
@@ -155,48 +121,6 @@ const GridLayoutComponent: React.FC<GridLayoutComponentProps> = ({ charts: initi
     onUpdateSelectedDataTypes(newSelectedDataTypes);
   };
 
-  const handleSaveAsTemplate = (templateName: string) => {
-    setTemplates((prev) => ({
-      ...prev,
-      [templateName]: charts
-    }));
-  };
-
-  const handleLoadTemplate = (templateName: string) => {
-    const templateCharts = templates[templateName];
-    if (templateCharts) {
-      setCharts(templateCharts);
-      onUpdateCharts(templateCharts);
-    }
-  };
-
-  const handleImportTemplate = (templateName: string, importedCharts: DashboardItem[]) => {
-    setTemplates((prev) => ({
-      ...prev,
-      [templateName]: importedCharts
-    }));
-  };
-
-  const handleDeleteTemplate = (templateName: string) => {
-    setTemplates((prev) => {
-      const { [templateName]: _, ...rest } = prev;
-      return rest;
-    });
-  };
-
-  const handleRenameTemplate = (oldTemplateName: string, newTemplateName: string) => {
-    const templateCharts = templates[oldTemplateName];
-    if (templateCharts) {
-      setTemplates((prev) => {
-        const { [oldTemplateName]: _, ...rest } = prev;
-        return {
-          ...rest,
-          [newTemplateName]: templateCharts
-        };
-      });
-    }
-  };
-
   useEffect(() => {
     setCharts(initialCharts);
   }, [initialCharts]);
@@ -207,8 +131,6 @@ const GridLayoutComponent: React.FC<GridLayoutComponentProps> = ({ charts: initi
 
   return (
     <div className="layout" style={{ position: 'relative', width: '100%', height: '100vh' }}>
-      <HeaderToggleButton headersUpdated={headersUpdated} toggleHeadersUpdated={toggleHeadersUpdated} />
-      <AddChartForm availableDataTypes={availableDataTypes} onAddChart={handleAddChart} />
       {charts.map((item, index) => (
         <Draggable
           key={item.id}
@@ -273,11 +195,11 @@ const GridLayoutComponent: React.FC<GridLayoutComponentProps> = ({ charts: initi
       ))}
       <DashboardTemplates
         templates={templates}
-        onLoadTemplate={handleLoadTemplate}
-        onImportTemplate={handleImportTemplate}
-        onDeleteTemplate={handleDeleteTemplate}
-        onRenameTemplate={handleRenameTemplate}
-        onSaveTemplate={handleSaveAsTemplate}
+        onLoadTemplate={onLoadTemplate}
+        onImportTemplate={onImportTemplate}
+        onDeleteTemplate={onDeleteTemplate}
+        onRenameTemplate={onRenameTemplate}
+        onSaveTemplate={onSaveTemplate} // Pass the missing onSaveTemplate prop
       />
     </div>
   );
