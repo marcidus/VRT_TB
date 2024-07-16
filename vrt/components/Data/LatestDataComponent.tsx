@@ -3,12 +3,12 @@ import { DataService } from './DataService';
 
 interface LatestDataComponentProps {
   dataType: string;
-  children: (data: any) => React.ReactNode;
+  children: (data: { timestamp: string; value: number }[]) => React.ReactNode;
 }
 
 const LatestDataComponent: React.FC<LatestDataComponentProps> = ({ dataType, children }) => {
   const [historicalData, setHistoricalData] = useState<{ timestamp: string; value: number }[]>([]);
-  const [latestData, setLatestData] = useState<any>(null);
+  const [liveData, setLiveData] = useState<{ timestamp: string; value: number }[]>([]);
 
   useEffect(() => {
     const dataService = DataService.getInstance();
@@ -18,9 +18,8 @@ const LatestDataComponent: React.FC<LatestDataComponentProps> = ({ dataType, chi
       setHistoricalData(data);
     };
 
-    const updateData = (data: any) => {
-      console.log('Latest data received for', dataType, ':', data);  // Log latest data for debugging
-      setLatestData(data);
+    const updateData = (data: { timestamp: string; value: number }) => {
+      setLiveData((prevLiveData) => [...prevLiveData, data]);
     };
 
     fetchHistoricalData();
@@ -28,10 +27,11 @@ const LatestDataComponent: React.FC<LatestDataComponentProps> = ({ dataType, chi
 
     return () => {
       dataService.unsubscribe(dataType, updateData);
+      setLiveData([]); // Clear live data when unsubscribing
     };
   }, [dataType]);
 
-  const combinedData = historicalData.concat(latestData ? [latestData] : []);
+  const combinedData = [...historicalData, ...liveData];
 
   return <>{children(combinedData)}</>;
 };

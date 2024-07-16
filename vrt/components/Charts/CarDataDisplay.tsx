@@ -174,7 +174,7 @@ const CarDataDisplay: React.FC<CarDataDisplayProps> = ({
                           </option>
                         ))}
                       </select>
-                      <span>{latestData ? latestData.value : 'No Data'}</span>
+                      <span>{latestData && latestData[latestData.length - 1] ? latestData[latestData.length - 1].value : 'No Data'}</span>
                     </div>
                   </Draggable>
                 )}

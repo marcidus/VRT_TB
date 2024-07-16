@@ -7,6 +7,7 @@ import Draggable from 'react-draggable';
 import { Resizable } from 'react-resizable';
 import 'react-resizable/css/styles.css';
 import { BarChartContainerProps, BarChartDataPoint } from './types/chartComponentTypes';
+import { DataService } from '../Data/DataService';
 
 const BarChartContainer: React.FC<BarChartContainerProps> = ({
   dataType,
@@ -21,8 +22,28 @@ const BarChartContainer: React.FC<BarChartContainerProps> = ({
   const [width, setWidth] = useState<number>(400);
   const [height, setHeight] = useState<number>(400);
   const [yAxisRange, setYAxisRange] = useState<{ min: number, max: number }>({ min: 0, max: 100 });
+  const [currentDataType, setCurrentDataType] = useState<string>(dataType);
 
-  // Effect to update the displayed data when data, dataPoints, or offset change
+  // Fetch historical data when the data type changes
+  useEffect(() => {
+    const fetchHistoricalData = async () => {
+      const dataService = DataService.getInstance();
+      const historicalData = await dataService.fetchHistoricalData(dataType);
+      const mappedData = historicalData.map(d => ({ x: d.timestamp, y: d.value }));
+      setData(mappedData);
+      setDisplayData(mappedData.slice(-dataPoints));
+    };
+
+    // Clear existing data when the data type changes
+    if (currentDataType !== dataType) {
+      setData([]);
+      setDisplayData([]);
+      setCurrentDataType(dataType);
+      fetchHistoricalData();
+    }
+  }, [dataType, dataPoints, currentDataType]);
+
+  // Update displayed data when data or display parameters change
   useEffect(() => {
     const start = Math.max(0, data.length - dataPoints);
     const end = data.length;
@@ -44,18 +65,13 @@ const BarChartContainer: React.FC<BarChartContainerProps> = ({
 
   return (
     <LatestDataComponent dataType={dataType}>
-      {(latestData) => {
-        if (latestData) {
-          // Ensure we don't re-render the component unnecessarily
-          if (!data.some(d => d.x === latestData.timestamp)) {
-            setData((prevData) => {
-              const updatedData = [...prevData, { x: latestData.timestamp, y: latestData.value }];
-              if (updatedData.length > 100) {
-                updatedData.shift();
-              }
-              return updatedData;
-            });
-          }
+      {(combinedData) => {
+        // Map combinedData to the appropriate format for the chart
+        const mappedData = combinedData.map(d => ({ x: d.timestamp, y: d.value }));
+
+        // Update data state with combined historical and live data
+        if (JSON.stringify(data) !== JSON.stringify(mappedData)) {
+          setData(mappedData);
         }
 
         return (
@@ -72,13 +88,18 @@ const BarChartContainer: React.FC<BarChartContainerProps> = ({
                 <Header
                   title={title}
                   dataType={dataType}
-                  onDataTypeChange={onDataTypeChange}
+                  onDataTypeChange={(newDataType) => {
+                    // Clear existing data when the data type changes
+                    setData([]);
+                    setDisplayData([]);
+                    onDataTypeChange(newDataType);
+                  }}
                   availableDataTypes={availableDataTypes}
                   dataPoints={dataPoints}
                   onDataPointsChange={handleDataPointsChange}
                 />
                 <YAxisRangeComponent
-                  data={data}
+                  data={displayData}
                   displayDataPoints={dataPoints}
                   onRangeChange={handleRangeChange}
                   onSpikeDetected={handleSpikeDetected}
