@@ -2,18 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import "leaflet/dist/leaflet.css";
 import "leaflet-defaulticon-compatibility"
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css"
-import "leaflet.offline"
 import { MapContainer, TileLayer, useMap, Polyline, Marker } from 'react-leaflet'
 import "../styles/map.css"
 import L from 'leaflet'
-import 'leaflet.offline';
 import html2canvas from 'html2canvas';
-import Popup from 'reactjs-popup';
-import { BiSolidFileImport, BiSolidFileImage, BiSolidFileJson, BiSolidSave, BiSolidDirectionLeft } from "react-icons/bi";
 import "leaflet-control-geocoder/dist/Control.Geocoder.css";
 import "leaflet-control-geocoder/dist/Control.Geocoder.js";
-import "leaflet-notifications/js/leaflet-notifications.js";
-import "leaflet-notifications/css/leaflet-notifications.css";
 import { AppBar, Box, Button, createTheme, CssBaseline, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, Drawer, FormControlLabel, Icon, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, ListSubheader, Menu, MenuItem, Stack, Switch, TextField, ThemeProvider, Toolbar, Tooltip, Typography } from '@mui/material/';
 import MenuIcon from '@mui/icons-material/Menu';
 import SensorsIcon from '@mui/icons-material/Sensors';
@@ -28,32 +22,21 @@ import 'react-notifications/lib/notifications.css';
 export default function MapComponent(props: any) {
   const [polylinePoints, setPolylinePoints] = useState<L.LatLng[]>([]);
   const [center, setCenter] = useState<L.LatLng>(L.latLng(46.174764452886265, 7.223735237766073));
-  const [boolTile, setBoolTile] = useState<boolean>(false);
   const [mapBounds, setMapBounds] = useState<L.LatLngBounds>();
   const [boolBounds, setBoolBounds] = useState<boolean>(false);
-  const [mapImage, setMapImage] = useState<HTMLImageElement>();
-  const [jsonBounds, setJsonBounds] = useState<L.LatLngBounds>();
   const [startFileName, setStartFileName] = useState<String>("default");
   const [imageUrl, setImageUrl] = useState(null);
   const [imageFileName, setImageFileName] = useState<String>("");
   const [jsonFileName, setJsonFileName] = useState<String>("");
+  const [checkedLiveMode, setCheckedLiveMode] = React.useState(false);
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [saveOpen, setSaveOpen] = React.useState(false);
+  const wsRef = useRef<WebSocket | null>(null);
   const darkTheme = createTheme({
     palette: {
       mode: 'dark',
     },
   });
-
-
-  const RecenterMap = ({ points }: { points: L.LatLng[] }) => {
-    const map = useMap();
-    useEffect(() => {
-      if (points.length > 0) {
-        const bounds = L.latLngBounds(points);
-        map.fitBounds(bounds);
-      }
-    }, [points, map]);
-    return null;
-  };
 
   //Function to get computer current location
   const getCurrentLocation = () => {
@@ -117,27 +100,6 @@ export default function MapComponent(props: any) {
   // Websocket connection to update the marker position
   const [markerPosition, setMarkerPosition] = useState<L.LatLng>(L.latLng(0, 0));
 
-  //Popup for save files to add to files
-  const SavePopup = () => {
-    // @ts-ignore */
-    let name;
-    return <Popup trigger={<button className='map-btn'>{<BiSolidSave className='map-btn-icon' />} Save Tiles </button>} modal>
-      {// @ts-ignore */
-        close => (
-          <span>
-            <button className="close" onClick={() => {
-              close();
-            }}>
-              &times;
-            </button>
-            <h2>Save Tiles</h2>
-            <p>Name for the map image and json file :</p>
-            <input type="text" placeholder="File Name" onChange={(e) => name = e.target.value} />
-            <button onClick={() => handleSaveTiles(name)}>Save</button>
-          </span>
-        )}
-    </Popup>
-  }
   const handleSaveTiles = (name: String) => {
     setStartFileName(name);
     let mapContainer = document.getElementById('map');
@@ -225,7 +187,7 @@ export default function MapComponent(props: any) {
     return null;
   }
 
-  //function to reset the map
+  //Function to reset the map
   const resetMap = () => {
     setPolylinePoints([]);
     setImageUrl(null)
@@ -270,28 +232,18 @@ export default function MapComponent(props: any) {
           const zoomLevel = 15;
           map.setView(center, zoomLevel);
         }).addTo(map);
-        geocoderControlAdded.current = true; // Mark as added
+        geocoderControlAdded.current = true;
 
       }
-    }, [map]); // Dependency array ensures this runs only when `map` is initialized or changed
-    return null; // This component does not render anything itself
+    }, [map]);
+    return null;
   };
 
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
-  const handleOpenMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  }
-  const handleCloseMenu = () => {
-    setAnchorEl(null);
-  }
-
-  const [checkedLiveMode, setCheckedLiveMode] = React.useState(false);
-  const wsRef = useRef<WebSocket | null>(null); // Use useRef to hold the WebSocket instance
+  //Function to activate or deactivate listening port
   const handleChangeLiveMode = (event: React.ChangeEvent<HTMLInputElement>) => {
     setCheckedLiveMode(event.target.checked);
     NotificationManager.info('Live mode is ' + (event.target.checked ? 'enabled' : 'disabled'));
-
     if (event.target.checked) {
       // Open a websocket connection
       if (!wsRef.current) {
@@ -334,11 +286,13 @@ export default function MapComponent(props: any) {
     }
   };
 
-  const [saveOpen, setSaveOpen] = React.useState(false);
+  //Handle save dialog
   const handleSaveOpen = () => setSaveOpen(true);
   const handleSaveClose = () => setSaveOpen(false);
 
-
+  //Handle menu
+  const handleOpenMenu = (event: React.MouseEvent<HTMLElement>) => {setAnchorEl(event.currentTarget);}
+  const handleCloseMenu = () => {setAnchorEl(null);}
 
   return (
     <ThemeProvider theme={darkTheme}>

@@ -28,8 +28,6 @@
     "leaflet-control-geocoder": "^2.4.0",
     "leaflet-defaulticon-compatibility": "^0.1.2",
     "leaflet-geosearch": "^4.0.0",
-    "leaflet-notifications": "^1.0.7",
-    "leaflet.offline": "^3.0.0-rc.4",
     "next": "14.2.4",
     "react": "^18.3.1",
     "react-chartjs-2": "^5.2.0",
@@ -38,7 +36,6 @@
     "react-icons": "^5.2.1",
     "react-leaflet": "^4.2.1",
     "react-notifications": "^1.7.4",
-    "reactjs-popup": "^2.0.6",
     "redis": "^4.6.14",
     "use-react-screenshot": "^4.0.0",
     "ws": "^8.17.1"
@@ -54,7 +51,7 @@
     "eslint": "^8",
     "eslint-config-next": "14.2.4",
     "postcss": "^8.4.38",
-    "tailwindcss": "^3.4.4",
+    "tailwindcss": "^3.4.5",
     "typescript": "^5"
   }
 }
