@@ -7,7 +7,6 @@ import Draggable from 'react-draggable';
 import { Resizable } from 'react-resizable';
 import 'react-resizable/css/styles.css';
 import { BarChartContainerProps, BarChartDataPoint } from './types/chartComponentTypes';
-import { DataService } from '../Data/DataService';
 
 const BarChartContainer: React.FC<BarChartContainerProps> = ({
   dataType,
@@ -16,43 +15,27 @@ const BarChartContainer: React.FC<BarChartContainerProps> = ({
   availableDataTypes,
   onDelete,
 }) => {
-  const [data, setData] = useState<BarChartDataPoint[]>([]);
   const [displayData, setDisplayData] = useState<BarChartDataPoint[]>([]);
   const [dataPoints, setDataPoints] = useState<number>(10);
   const [width, setWidth] = useState<number>(400);
   const [height, setHeight] = useState<number>(400);
   const [yAxisRange, setYAxisRange] = useState<{ min: number, max: number }>({ min: 0, max: 100 });
+  const [offset, setOffset] = useState<number>(0);
   const [currentDataType, setCurrentDataType] = useState<string>(dataType);
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [startX, setStartX] = useState<number | null>(null);
 
-  // Fetch historical data when the data type changes
   useEffect(() => {
-    const fetchHistoricalData = async () => {
-      const dataService = DataService.getInstance();
-      const historicalData = await dataService.fetchHistoricalData(dataType);
-      const mappedData = historicalData.map(d => ({ x: d.timestamp, y: d.value }));
-      setData(mappedData);
-      setDisplayData(mappedData.slice(-dataPoints));
-    };
-
     // Clear existing data when the data type changes
     if (currentDataType !== dataType) {
-      setData([]);
       setDisplayData([]);
       setCurrentDataType(dataType);
-      fetchHistoricalData();
     }
-  }, [dataType, dataPoints, currentDataType]);
-
-  // Update displayed data when data or display parameters change
-  useEffect(() => {
-    const start = Math.max(0, data.length - dataPoints);
-    const end = data.length;
-    setDisplayData(data.slice(start, end));
-  }, [data, dataPoints]);
+  }, [dataType, currentDataType]);
 
   const handleRangeChange = (filteredData: { x: string, y: number }[], min: number, max: number) => {
     setYAxisRange({ min, max });
-    setDisplayData(filteredData);
+    setDisplayData(filteredData.map(d => ({ ...d, type: 'historical' })));
   };
 
   const handleSpikeDetected = (spike: { x: string, y: number }) => {
@@ -63,16 +46,49 @@ const BarChartContainer: React.FC<BarChartContainerProps> = ({
     setDataPoints(newDataPoints);
   };
 
+  const handleDrag = (direction: 'left' | 'right') => {
+    setOffset((prevOffset) => {
+      const newOffset = direction === 'left' ? prevOffset - 10 : prevOffset + 10;
+      return Math.max(0, newOffset);
+    });
+  };
+
+  const handleMouseDown = (event: React.MouseEvent) => {
+    setIsDragging(true);
+    setStartX(event.clientX);
+    document.body.style.userSelect = 'none'; // Prevent text selection
+    document.body.style.cursor = 'grabbing'; // Change cursor to grabbing
+  };
+
+  const handleMouseMove = (event: React.MouseEvent) => {
+    if (isDragging && startX !== null) {
+      const deltaX = event.clientX - startX;
+      if (Math.abs(deltaX) > 50) {
+        const direction = deltaX > 0 ? 'left' : 'right';
+        handleDrag(direction);
+        setStartX(event.clientX); // Reset startX to the current position
+      }
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+    setStartX(null);
+    document.body.style.userSelect = ''; // Re-enable text selection
+    document.body.style.cursor = ''; // Revert cursor to default
+  };
+
   return (
     <LatestDataComponent dataType={dataType}>
-      {(combinedData) => {
-        // Map combinedData to the appropriate format for the chart
-        const mappedData = combinedData.map(d => ({ x: d.timestamp, y: d.value }));
+      {(historicalData, liveData) => {
+        const combinedData = [
+          ...historicalData.map(d => ({ x: d.timestamp, y: d.value, type: 'historical' })),
+          ...liveData.map(d => ({ x: d.timestamp, y: d.value, type: 'live' })),
+        ];
 
-        // Update data state with combined historical and live data
-        if (JSON.stringify(data) !== JSON.stringify(mappedData)) {
-          setData(mappedData);
-        }
+        const start = Math.max(0, combinedData.length - dataPoints - offset);
+        const end = Math.max(0, combinedData.length - offset);
+        const displayData = combinedData.slice(start, end);
 
         return (
           <Draggable handle=".handle-bar">
@@ -84,13 +100,19 @@ const BarChartContainer: React.FC<BarChartContainerProps> = ({
                 setHeight(size.height);
               }}
             >
-              <div className="border-2 border-gray-400 rounded shadow p-2" style={{ width, height }}>
+              <div
+                className="border-2 border-gray-400 rounded shadow p-2"
+                style={{ width, height }}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+              >
                 <Header
                   title={title}
                   dataType={dataType}
                   onDataTypeChange={(newDataType) => {
                     // Clear existing data when the data type changes
-                    setData([]);
                     setDisplayData([]);
                     onDataTypeChange(newDataType);
                   }}

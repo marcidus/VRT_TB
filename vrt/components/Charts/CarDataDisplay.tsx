@@ -3,7 +3,7 @@ import Draggable from 'react-draggable';
 import { Resizable } from 'react-resizable';
 import 'react-resizable/css/styles.css';
 import { FaCar, FaTrash } from 'react-icons/fa';
-import LatestDataComponent from '../Data/LatestDataComponent';
+import LatestLiveDataComponent from '../Data/LatestLiveDataComponent';
 import { CarDataDisplayProps } from './types/chartComponentTypes';
 import { DataService } from '../Data/DataService';
 
@@ -113,7 +113,7 @@ const CarDataDisplay: React.FC<CarDataDisplayProps> = ({
               style={{ width: '100%', height: '100%', objectFit: 'contain', position: 'absolute', top: 0, left: 0, zIndex: 1 }}
             />
             {Object.keys(labels).map((key) => (
-              <LatestDataComponent key={`${key}-${selectedDataTypes[key]}`} dataType={selectedDataTypes[key]}>
+              <LatestLiveDataComponent key={`${key}-${selectedDataTypes[key]}`} dataType={selectedDataTypes[key]}>
                 {(latestData) => (
                   <Draggable
                     key={key}
@@ -161,6 +161,12 @@ const CarDataDisplay: React.FC<CarDataDisplayProps> = ({
                           const newDataType = e.target.value;
                           onDataTypeChange(key, newDataType);
 
+                          // Unsubscribe from the old data type
+                          const oldDataType = selectedDataTypes[key];
+                          if (oldDataType) {
+                            DataService.getInstance().unsubscribe(oldDataType, () => {});
+                          }
+
                           // Subscribe to the new data type
                           const dataService = DataService.getInstance();
                           dataService.subscribe(newDataType, () => {});
@@ -174,11 +180,11 @@ const CarDataDisplay: React.FC<CarDataDisplayProps> = ({
                           </option>
                         ))}
                       </select>
-                      <span>{latestData && latestData[latestData.length - 1] ? latestData[latestData.length - 1].value : 'No Data'}</span>
+                      <span>{latestData ? latestData.value : 'No Data'}</span>
                     </div>
                   </Draggable>
                 )}
-              </LatestDataComponent>
+              </LatestLiveDataComponent>
             ))}
           </div>
         </div>

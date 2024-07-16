@@ -3,7 +3,7 @@ import { DataService } from './DataService';
 
 interface LatestDataComponentProps {
   dataType: string;
-  children: (data: { timestamp: string; value: number }[]) => React.ReactNode;
+  children: (historicalData: { timestamp: string; value: number }[], liveData: { timestamp: string; value: number }[]) => React.ReactNode;
 }
 
 const LatestDataComponent: React.FC<LatestDataComponentProps> = ({ dataType, children }) => {
@@ -15,7 +15,7 @@ const LatestDataComponent: React.FC<LatestDataComponentProps> = ({ dataType, chi
 
     const fetchHistoricalData = async () => {
       const data = await dataService.fetchHistoricalData(dataType);
-      setHistoricalData(data);
+      setHistoricalData(data.reverse()); // Reverse to have the most recent data last
     };
 
     const updateData = (data: { timestamp: string; value: number }) => {
@@ -31,9 +31,7 @@ const LatestDataComponent: React.FC<LatestDataComponentProps> = ({ dataType, chi
     };
   }, [dataType]);
 
-  const combinedData = [...historicalData, ...liveData];
-
-  return <>{children(combinedData)}</>;
+  return <>{children(historicalData, liveData)}</>;
 };
 
 export default LatestDataComponent;

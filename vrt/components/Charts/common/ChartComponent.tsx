@@ -1,9 +1,3 @@
-/**
- * Author: Alexandre Martroye de Joly
- * Description: This component renders a line chart using the Recharts library. It displays the given data points
- *              and supports custom Y-axis range.
- */
-
 import React, { useState } from 'react';
 import {
   LineChart,
