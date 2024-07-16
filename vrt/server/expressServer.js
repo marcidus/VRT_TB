@@ -99,6 +99,32 @@ app.get('/telemetry', async (req, res) => {
 });
 
 /**
+ * Endpoint to retrieve telemetry data for a specific sensor.
+ * Responds with the telemetry data stored in Redis for the specified sensor.
+ */
+app.get('/telemetry/:sensorType', async (req, res) => {
+  try {
+    const sensorType = req.params.sensorType;
+    const data = await getBinaryTelemetryData();
+
+    const sensorData = data
+      .map(item => {
+        const binaryData = Buffer.from(item.data, 'base64');
+        const decodedData = binaryData.toString('utf-8');
+        const jsonData = JSON.parse(decodedData);
+        return { timestamp: item.timestamp, value: jsonData[sensorType] };
+      })
+      .filter(item => item.value !== undefined);
+
+    res.json(sensorData);
+  } catch (error) {
+    console.error(`Error retrieving telemetry data for sensor ${req.params.sensorType}:`, error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+
+/**
  * Endpoint to establish SSE connection.
  * Sends telemetry updates to connected clients.
  */

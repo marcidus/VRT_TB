@@ -88,6 +88,17 @@ export class DataService {
     }
   }
 
+  public async fetchHistoricalData(sensorType: string): Promise<{ timestamp: string; value: number }[]> {
+    try {
+      const response = await fetch(`http://localhost:3001/telemetry/${sensorType}`);
+      return await response.json();
+    } catch (error) {
+      console.error(`Error fetching historical data for sensor ${sensorType}:`, error);
+      return [];
+    }
+  }
+  
+
   public subscribeToHeadersUpdated(callback: (headersUpdated: boolean) => void): void {
     this.headersUpdatedCallbacks.push(callback);
   }
