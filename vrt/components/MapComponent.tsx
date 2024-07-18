@@ -8,7 +8,7 @@ import L from 'leaflet'
 import html2canvas from 'html2canvas';
 import "leaflet-control-geocoder/dist/Control.Geocoder.css";
 import "leaflet-control-geocoder/dist/Control.Geocoder.js";
-import { AppBar, Box, Button, createTheme, CssBaseline, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, Drawer, FormControlLabel, Icon, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, ListSubheader, Menu, MenuItem, Stack, Switch, TextField, ThemeProvider, Toolbar, Tooltip, Typography } from '@mui/material/';
+import { AppBar, Box, Button, createTheme, CssBaseline, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, Drawer, FormControlLabel, FormGroup, Icon, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, ListSubheader, Menu, MenuItem, Stack, Switch, TextField, ThemeProvider, Toolbar, Tooltip, Typography } from '@mui/material/';
 import MenuIcon from '@mui/icons-material/Menu';
 import SensorsIcon from '@mui/icons-material/Sensors';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
@@ -37,6 +37,12 @@ export default function MapComponent(props: any) {
       mode: 'dark',
     },
   });
+  const redGradientCircleIcon = L.divIcon({
+    className: 'custom-div-icon',
+    html: "<div style='width: 20px; height: 20px; border-radius: 50%; border: 1px solid black; background-image: radial-gradient(at top left, #f87c7c, #ff0000);'></div>",
+    iconSize: [20, 20],
+    iconAnchor: [10, 10]
+  });
 
   //Function to get computer current location
   const getCurrentLocation = () => {
@@ -58,7 +64,7 @@ export default function MapComponent(props: any) {
   };
   useEffect(() => {
     console.log('Getting current location...');
-    getCurrentLocation().then((pos:any) => {
+    getCurrentLocation().then((pos: any) => {
       console.log('Current location:', L.latLng(pos.latitude, pos.longitude));
       setCenter(L.latLng(pos.latitude, pos.longitude));
     }, (error) => {
@@ -67,7 +73,7 @@ export default function MapComponent(props: any) {
   }, []);
 
 
-  //Temporary function to handle file upload
+  //Function to upload CSV file
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files ? event.target.files[0] : null;
     if (!file) return;
@@ -77,7 +83,7 @@ export default function MapComponent(props: any) {
       const text = e.target?.result;
       const rows = text?.toString().split('\n') || [];
       const header = rows[0].split(',');
-      const gpsIndex = header.findIndex((col) => col.includes('GPS'));
+      const gpsIndex = header.findIndex((col) => col.includes('GPSCoords'));
       if (gpsIndex === -1) return;
 
       const points = rows.slice(1).map(row => {
@@ -99,6 +105,7 @@ export default function MapComponent(props: any) {
 
   // Websocket connection to update the marker position
   const [markerPosition, setMarkerPosition] = useState<L.LatLng>(L.latLng(0, 0));
+
 
   const handleSaveTiles = (name: String) => {
     setStartFileName(name);
@@ -125,7 +132,6 @@ export default function MapComponent(props: any) {
       console.log(file.name.split('.')[0]);
       const reader = new FileReader();
       reader.onloadend = () => {
-        // Assuming setImageUrl is the function to update state
         setImageUrl(reader.result);
       };
       reader.readAsDataURL(file);
@@ -251,7 +257,7 @@ export default function MapComponent(props: any) {
         wsRef.current.onmessage = (event) => {
           try {
             const data = JSON.parse(event.data);
-            const gpsKey = Object.keys(data).find(key => key.includes("GPS"));
+            const gpsKey = Object.keys(data).find(key => key.includes("GPSCoords"));
             if (gpsKey) {
               const [latStr, lonStr] = data[gpsKey].split(' ');
               const lat = parseFloat(latStr);
@@ -291,8 +297,8 @@ export default function MapComponent(props: any) {
   const handleSaveClose = () => setSaveOpen(false);
 
   //Handle menu
-  const handleOpenMenu = (event: React.MouseEvent<HTMLElement>) => {setAnchorEl(event.currentTarget);}
-  const handleCloseMenu = () => {setAnchorEl(null);}
+  const handleOpenMenu = (event: React.MouseEvent<HTMLElement>) => { setAnchorEl(event.currentTarget); }
+  const handleCloseMenu = () => { setAnchorEl(null); }
 
   return (
     <ThemeProvider theme={darkTheme}>
@@ -335,21 +341,6 @@ export default function MapComponent(props: any) {
                   sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}
                   subheader={<ListSubheader>Map Settings</ListSubheader>}
                 >
-                  <Divider />
-                  <ListItem>
-                    <ListItemIcon>
-                      <SensorsIcon />
-                    </ListItemIcon>
-                    <ListItemText primary="Live mode" />
-                    <Switch
-                      checked={checkedLiveMode}
-                      onChange={handleChangeLiveMode}
-                      edge="end"
-                      inputProps={{
-                        'aria-label': 'switch-live-mode',
-                      }}
-                    />
-                  </ListItem>
                   <Divider />
                   <ListItem>
                     <ListItemText primary="Upload Map Image " />
@@ -416,11 +407,11 @@ export default function MapComponent(props: any) {
                   </ListItem>
                   <Divider />
                   <ListItem>
-                    <ListItemText primary="Upload CSV "/>
+                    <ListItemText primary="Upload CSV " />
                     <Tooltip title="Upload CSV to display the car path of a past session">
                       <Button variant="contained" component="label" sx={{ ml: 5 }}>
                         <UploadFileIcon />
-                        <input type="file" hidden accept='.png' onChange={handleFileUpload} />
+                        <input type="file" hidden accept='.csv' onChange={handleFileUpload} />
                       </Button>
                     </Tooltip>
                   </ListItem>
@@ -439,6 +430,21 @@ export default function MapComponent(props: any) {
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
               Map
             </Typography>
+            <FormGroup>
+              <FormControlLabel
+                label="Live mode"
+                labelPlacement="start"
+                control={<Switch
+                  checked={checkedLiveMode}
+                  onChange={handleChangeLiveMode}
+                  edge="end"
+                  inputProps={{
+                    'aria-label': 'switch-live-mode',
+                  }}
+                />
+                }
+              />
+            </FormGroup>
           </Toolbar>
         </AppBar>
         <div className='mapDiv' style={{
@@ -451,7 +457,7 @@ export default function MapComponent(props: any) {
               <TileLayer url='https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}' />
             )}
             <Polyline positions={polylinePoints} />
-            <Marker position={markerPosition} />
+            <Marker position={markerPosition} icon={redGradientCircleIcon} />
             <GetBounds bool={boolBounds} />
             <SetBounds bounds={mapBounds} />
             <GeoControlSearchBar />
