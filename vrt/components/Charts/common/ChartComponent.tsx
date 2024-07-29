@@ -20,7 +20,7 @@ interface ChartDataPoint {
 interface ChartComponentProps {
   displayData: ChartDataPoint[];
   yAxisRange: { min: number, max: number };
-  onDrag: (direction: 'left' | 'right') => void; // New prop for handling drag
+  onDrag: (direction: 'left' | 'right') => void; // Prop for handling drag
 }
 
 const ChartComponent: React.FC<ChartComponentProps> = ({ displayData, yAxisRange, onDrag }) => {

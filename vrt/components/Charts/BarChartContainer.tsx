@@ -4,7 +4,6 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import Header from './common/Header';
 import YAxisRangeComponent from './common/YAxisRangeComponent';
 import Draggable from 'react-draggable';
-import { Resizable } from 'react-resizable';
 import 'react-resizable/css/styles.css';
 import { BarChartContainerProps, BarChartDataPoint } from './types/chartComponentTypes';
 
@@ -17,9 +16,7 @@ const BarChartContainer: React.FC<BarChartContainerProps> = ({
 }) => {
   const [displayData, setDisplayData] = useState<BarChartDataPoint[]>([]);
   const [dataPoints, setDataPoints] = useState<number>(10);
-  const [width, setWidth] = useState<number>(400);
-  const [height, setHeight] = useState<number>(400);
-  const [yAxisRange, setYAxisRange] = useState<{ min: number, max: number }>({ min: 0, max: 100 });
+  const [yAxisRange, setYAxisRange] = useState<{ min: number; max: number }>({ min: 0, max: 100 });
   const [offset, setOffset] = useState<number>(0);
   const [currentDataType, setCurrentDataType] = useState<string>(dataType);
   const [isDragging, setIsDragging] = useState<boolean>(false);
@@ -53,25 +50,25 @@ const BarChartContainer: React.FC<BarChartContainerProps> = ({
     });
   };
 
-  const handleMouseDown = (event: React.MouseEvent) => {
+  const handleChartMouseDown = (event: React.MouseEvent) => {
     setIsDragging(true);
     setStartX(event.clientX);
     document.body.style.userSelect = 'none'; // Prevent text selection
     document.body.style.cursor = 'grabbing'; // Change cursor to grabbing
   };
 
-  const handleMouseMove = (event: React.MouseEvent) => {
+  const handleChartMouseMove = (event: React.MouseEvent) => {
     if (isDragging && startX !== null) {
       const deltaX = event.clientX - startX;
       if (Math.abs(deltaX) > 50) {
-        const direction = deltaX > 0 ? 'left' : 'right';
+        const direction = deltaX > 0 ? 'right' : 'left';
         handleDrag(direction);
         setStartX(event.clientX); // Reset startX to the current position
       }
     }
   };
 
-  const handleMouseUp = () => {
+  const handleChartMouseUp = () => {
     setIsDragging(false);
     setStartX(null);
     document.body.style.userSelect = ''; // Re-enable text selection
@@ -89,43 +86,39 @@ const BarChartContainer: React.FC<BarChartContainerProps> = ({
         const start = Math.max(0, combinedData.length - dataPoints - offset);
         const end = Math.max(0, combinedData.length - offset);
         const displayData = combinedData.slice(start, end);
+        const currentValue = displayData.length ? displayData[displayData.length - 1].y : 0;
 
         return (
           <Draggable handle=".handle-bar">
-            <Resizable
-              width={width}
-              height={height}
-              onResize={(e, { size }) => {
-                setWidth(size.width);
-                setHeight(size.height);
-              }}
-            >
+            <div className="border-2 border-gray-400 rounded shadow p-2" style={{ width: '100%', height: '100%' }}>
+              <Header
+                title={title}
+                dataType={dataType}
+                onDataTypeChange={(newDataType) => {
+                  // Clear existing data when the data type changes
+                  setDisplayData([]);
+                  onDataTypeChange(newDataType);
+                }}
+                availableDataTypes={availableDataTypes}
+                dataPoints={dataPoints}
+                onDataPointsChange={handleDataPointsChange}
+                currentValue={currentValue}
+              />
+              <YAxisRangeComponent
+                data={displayData}
+                displayDataPoints={dataPoints}
+                onRangeChange={handleRangeChange}
+                onSpikeDetected={handleSpikeDetected}
+              />
               <div
-                className="border-2 border-gray-400 rounded shadow p-2"
-                style={{ width, height }}
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                onMouseLeave={handleMouseUp}
+                onMouseDown={handleChartMouseDown}
+                onMouseMove={handleChartMouseMove}
+                onMouseUp={handleChartMouseUp}
+                onMouseLeave={handleChartMouseUp}
+                style={{
+                  cursor: isDragging ? 'grabbing' : 'grab',
+                }}
               >
-                <Header
-                  title={title}
-                  dataType={dataType}
-                  onDataTypeChange={(newDataType) => {
-                    // Clear existing data when the data type changes
-                    setDisplayData([]);
-                    onDataTypeChange(newDataType);
-                  }}
-                  availableDataTypes={availableDataTypes}
-                  dataPoints={dataPoints}
-                  onDataPointsChange={handleDataPointsChange}
-                />
-                <YAxisRangeComponent
-                  data={displayData}
-                  displayDataPoints={dataPoints}
-                  onRangeChange={handleRangeChange}
-                  onSpikeDetected={handleSpikeDetected}
-                />
                 <ResponsiveContainer width="100%" height={400}>
                   <BarChart data={displayData}>
                     <CartesianGrid strokeDasharray="3 3" />
@@ -136,11 +129,11 @@ const BarChartContainer: React.FC<BarChartContainerProps> = ({
                     <Bar dataKey="y" fill="#8884d8" />
                   </BarChart>
                 </ResponsiveContainer>
-                <button onClick={onDelete} className="bg-red-500 text-white rounded px-4 py-2 mt-2">
-                  Delete
-                </button>
               </div>
-            </Resizable>
+              <button onClick={onDelete} className="bg-red-500 text-white rounded px-4 py-2 mt-2">
+                Delete
+              </button>
+            </div>
           </Draggable>
         );
       }}

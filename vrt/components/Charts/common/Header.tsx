@@ -1,9 +1,3 @@
-/**
- * Author: Alexandre Martroye de Joly
- * Description: This component provides a header for chart containers, allowing users to select data types and adjust
- *              the number of data points to display. It includes a title, a data type dropdown, and a data points slider.
- */
-
 import React, { useEffect } from 'react';
 
 // Props for the Header component
@@ -14,6 +8,7 @@ interface HeaderProps {
   availableDataTypes: string[]; // List of available data types to select from
   dataPoints: number; // The number of data points to display
   onDataPointsChange: (newPoints: number) => void; // Function to handle changes in data points
+  currentValue: number; // The current value being displayed
 }
 
 const Header: React.FC<HeaderProps> = ({
@@ -23,6 +18,7 @@ const Header: React.FC<HeaderProps> = ({
   availableDataTypes,
   dataPoints,
   onDataPointsChange,
+  currentValue,
 }) => {
   useEffect(() => {
     // Ensure the dropdown menu updates whenever availableDataTypes change
@@ -55,6 +51,7 @@ const Header: React.FC<HeaderProps> = ({
             className="ml-2"
           />
           <span className="ml-2 text-white">{dataPoints}</span>
+          <span className="ml-4 text-white">Current: {currentValue}</span>
         </div>
       </div>
     </div>

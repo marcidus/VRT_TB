@@ -4,7 +4,6 @@ import ChartComponent from './common/ChartComponent';
 import Header from './common/Header';
 import YAxisRangeComponent from './common/YAxisRangeComponent';
 import { ChartContainerProps } from './types/chartComponentTypes';
-import { DataService } from '../Data/DataService';
 
 const ChartContainer: React.FC<ChartContainerProps> = ({
   dataType,
@@ -58,6 +57,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
         const start = Math.max(0, combinedData.length - dataPoints - offset);
         const end = Math.max(0, combinedData.length - offset);
         const displayData = combinedData.slice(start, end);
+        const currentValue = displayData.length ? displayData[displayData.length - 1].y : 0;
 
         return (
           <div className="border-2 border-gray-400 rounded shadow p-2" style={{ width: '100%', height: '100%' }}>
@@ -72,6 +72,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
               availableDataTypes={availableDataTypes}
               dataPoints={dataPoints}
               onDataPointsChange={handleDataPointsChange}
+              currentValue={currentValue}
             />
             <YAxisRangeComponent
               data={displayData}
