@@ -96,7 +96,6 @@ const GridLayoutComponent: React.FC<GridLayoutComponentProps> = ({ charts: initi
         width: 400,
         height: 600,
       } as CarDataItem;
-      // Initialize selectedDataTypes with the first available data type
       setSelectedDataTypes((prevSelectedDataTypes) => ({
         ...prevSelectedDataTypes,
         Left_Front_Wheel: availableDataTypes[0],
@@ -121,12 +120,13 @@ const GridLayoutComponent: React.FC<GridLayoutComponentProps> = ({ charts: initi
     setCharts(newCharts);
     onUpdateCharts(newCharts);
   };
-  
 
   const handleDeleteChart = (index: number) => {
-    const newCharts = charts.filter((_, i) => i !== index);
-    setCharts(newCharts);
-    onUpdateCharts(newCharts);
+    if (window.confirm('Are you sure you want to delete this chart?')) {
+      const newCharts = charts.filter((_, i) => i !== index);
+      setCharts(newCharts);
+      onUpdateCharts(newCharts);
+    }
   };
 
   const handleDragStop = (e: DraggableEvent, data: DraggableData, index: number) => {
