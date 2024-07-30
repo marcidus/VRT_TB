@@ -18,12 +18,13 @@ interface ChartDataPoint {
 
 // Define the props for the ChartComponent
 interface ChartComponentProps {
-  displayData: ChartDataPoint[];
+  displayData: { [key: string]: ChartDataPoint[] };
   yAxisRange: { min: number, max: number };
   onDrag: (direction: 'left' | 'right') => void; // Prop for handling drag
+  sensors: string[];
 }
 
-const ChartComponent: React.FC<ChartComponentProps> = ({ displayData, yAxisRange, onDrag }) => {
+const ChartComponent: React.FC<ChartComponentProps> = ({ displayData, yAxisRange, onDrag, sensors }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState<number | null>(null);
 
@@ -52,6 +53,8 @@ const ChartComponent: React.FC<ChartComponentProps> = ({ displayData, yAxisRange
     document.body.style.cursor = ''; // Revert cursor to default
   };
 
+  const colors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#387908'];
+
   return (
     <div
       onMouseDown={handleMouseDown}
@@ -63,7 +66,7 @@ const ChartComponent: React.FC<ChartComponentProps> = ({ displayData, yAxisRange
       }}
     >
       <ResponsiveContainer width="100%" height={400}>
-        <LineChart data={displayData}>
+        <LineChart>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="x" />
           <YAxis
@@ -72,7 +75,17 @@ const ChartComponent: React.FC<ChartComponentProps> = ({ displayData, yAxisRange
           />
           <Tooltip />
           <Legend />
-          <Line type="monotone" dataKey="y" stroke="#8884d8" activeDot={{ r: 8 }} />
+          {sensors.map((sensor, index) => (
+            <Line
+              key={sensor}
+              type="monotone"
+              dataKey="y"
+              data={displayData[sensor]}
+              name={sensor.replace('_', ' ')} // Use sensor name for legend and format it
+              stroke={colors[index % colors.length]}
+              activeDot={{ r: 8 }}
+            />
+          ))}
         </LineChart>
       </ResponsiveContainer>
     </div>
