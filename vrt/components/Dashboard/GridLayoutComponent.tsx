@@ -10,6 +10,7 @@ import HeaderToggleButton from './HeaderToggleButton';
 import 'react-resizable/css/styles.css';
 import { CarDataItem, ChartItem, DashboardItem } from './DashboardItemTypes';
 import DashboardTemplates from './DashboardTemplates';
+import { DragProvider } from '../Charts/common/DragContext'; // Import the DragProvider
 
 // Props for the GridLayoutComponent
 interface GridLayoutComponentProps {
@@ -206,80 +207,82 @@ const GridLayoutComponent: React.FC<GridLayoutComponentProps> = ({ charts: initi
   }, [initialSelectedDataTypes]);
 
   return (
-    <div className="layout" style={{ position: 'relative', width: '100%', height: '100vh' }}>
-      <HeaderToggleButton headersUpdated={headersUpdated} toggleHeadersUpdated={toggleHeadersUpdated} />
-      <AddChartForm availableDataTypes={availableDataTypes} onAddChart={handleAddChart} />
-      {charts.map((item, index) => (
-        <Draggable
-          key={item.id}
-          handle=".handle-bar"
-          defaultPosition={{ x: item.x, y: item.y }}
-          onStop={(e, data) => handleDragStop(e, data, index)}
-        >
-          <ResizableBox
-            width={item.width}
-            height={item.height}
-            minConstraints={[100, 100]}
-            maxConstraints={[1000, 1000]}
-            onResizeStop={(e, data) => handleResizeStop(e, data, index)}
+    <DragProvider>
+      <div className="layout" style={{ position: 'relative', width: '100%', height: '100vh' }}>
+        <HeaderToggleButton headersUpdated={headersUpdated} toggleHeadersUpdated={toggleHeadersUpdated} />
+        <AddChartForm availableDataTypes={availableDataTypes} onAddChart={handleAddChart} />
+        {charts.map((item, index) => (
+          <Draggable
+            key={item.id}
+            handle=".handle-bar"
+            defaultPosition={{ x: item.x, y: item.y }}
+            onStop={(e, data) => handleDragStop(e, data, index)}
           >
-            <div className="border rounded shadow p-2" style={{ width: '100%', height: '100%' }}>
-              {'chartType' in item && item.chartType === 'line' && (
-                <ChartContainer
-                  dataType={item.dataType}
-                  title={item.title}
-                  onDataTypeChange={(newDataType) => handleDataTypeChange(index, newDataType)}
-                  availableDataTypes={availableDataTypes}
-                  onDelete={() => handleDeleteChart(index)}
-                />
-              )}
-              {'chartType' in item && item.chartType === 'bar' && (
-                <BarChartContainer
-                  dataType={item.dataType}
-                  title={item.title}
-                  onDataTypeChange={(newDataType) => handleDataTypeChange(index, newDataType)}
-                  availableDataTypes={availableDataTypes}
-                  onDelete={() => handleDeleteChart(index)}
-                />
-              )}
-              {'chartType' in item && item.chartType === 'pie' && (
-                <PieChartContainer
-                  dataType={item.dataType}
-                  title={item.title}
-                  onDataTypeChange={(newDataType) => handleDataTypeChange(index, newDataType)}
-                  availableDataTypes={availableDataTypes}
-                  onDelete={() => handleDeleteChart(index)}
-                />
-              )}
-              {'type' in item && item.type === 'car' && (
-                <CarDataDisplay
-                  data={carData} // Provide the carData prop here
-                  onDelete={() => handleDeleteChart(index)}
-                  availableDataTypes={availableDataTypes}
-                  onDataTypeChange={handleCarDataTypeChange}
-                  selectedDataTypes={selectedDataTypes}
-                  onPositionChange={(x, y) => {
-                    const newCharts = [...charts];
-                    newCharts[index].x = x;
-                    newCharts[index].y = y;
-                    setCharts(newCharts);
-                    onUpdateCharts(newCharts);
-                  }}
-                />
-              )}
-            </div>
-          </ResizableBox>
-        </Draggable>
-      ))}
-      <DashboardTemplates
-        templates={templates}
-        onLoadTemplate={handleLoadTemplate}
-        onImportTemplate={handleImportTemplate}
-        onDeleteTemplate={handleDeleteTemplate}
-        onRenameTemplate={handleRenameTemplate}
-        onSaveTemplate={handleSaveAsTemplate}
-      />
-    </div>
+            <ResizableBox
+              width={item.width}
+              height={item.height}
+              minConstraints={[100, 100]}
+              maxConstraints={[1000, 1000]}
+              onResizeStop={(e, data) => handleResizeStop(e, data, index)}
+            >
+              <div className="border rounded shadow p-2" style={{ width: '100%', height: '100%' }}>
+                {'chartType' in item && item.chartType === 'line' && (
+                  <ChartContainer
+                    dataType={item.dataType}
+                    title={item.title}
+                    onDataTypeChange={(newDataType) => handleDataTypeChange(index, newDataType)}
+                    availableDataTypes={availableDataTypes}
+                    onDelete={() => handleDeleteChart(index)}
+                  />
+                )}
+                {'chartType' in item && item.chartType === 'bar' && (
+                  <BarChartContainer
+                    dataType={item.dataType}
+                    title={item.title}
+                    onDataTypeChange={(newDataType) => handleDataTypeChange(index, newDataType)}
+                    availableDataTypes={availableDataTypes}
+                    onDelete={() => handleDeleteChart(index)}
+                  />
+                )}
+                {'chartType' in item && item.chartType === 'pie' && (
+                  <PieChartContainer
+                    dataType={item.dataType}
+                    title={item.title}
+                    onDataTypeChange={(newDataType) => handleDataTypeChange(index, newDataType)}
+                    availableDataTypes={availableDataTypes}
+                    onDelete={() => handleDeleteChart(index)}
+                  />
+                )}
+                {'type' in item && item.type === 'car' && (
+                  <CarDataDisplay
+                    data={carData} // Provide the carData prop here
+                    onDelete={() => handleDeleteChart(index)}
+                    availableDataTypes={availableDataTypes}
+                    onDataTypeChange={handleCarDataTypeChange}
+                    selectedDataTypes={selectedDataTypes}
+                    onPositionChange={(x, y) => {
+                      const newCharts = [...charts];
+                      newCharts[index].x = x;
+                      newCharts[index].y = y;
+                      setCharts(newCharts);
+                      onUpdateCharts(newCharts);
+                    }}
+                  />
+                )}
+              </div>
+            </ResizableBox>
+          </Draggable>
+        ))}
+        <DashboardTemplates
+          templates={templates}
+          onLoadTemplate={handleLoadTemplate}
+          onImportTemplate={handleImportTemplate}
+          onDeleteTemplate={handleDeleteTemplate}
+          onRenameTemplate={handleRenameTemplate}
+          onSaveTemplate={handleSaveAsTemplate}
+        />
+      </div>
+    </DragProvider>
   );
 };
 

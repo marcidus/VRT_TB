@@ -45,6 +45,8 @@ export interface ChartContainerProps {
   onDataTypeChange: (newDataType: string) => void;
   availableDataTypes: string[];
   onDelete: () => void;
+  globalOffset: number; // Add this line
+  setGlobalOffset: React.Dispatch<React.SetStateAction<number>>; // Add this line
 }
 
 // Props for PieChartContainer component
@@ -63,4 +65,6 @@ export interface BarChartContainerProps {
   onDataTypeChange: (newDataType: string) => void;
   availableDataTypes: string[];
   onDelete: () => void;
+  globalOffset: number; // Add this line
+  setGlobalOffset: React.Dispatch<React.SetStateAction<number>>; // Add this line
 }

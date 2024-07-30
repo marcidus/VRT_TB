@@ -6,6 +6,7 @@ import YAxisRangeComponent from './common/YAxisRangeComponent';
 import Draggable from 'react-draggable';
 import 'react-resizable/css/styles.css';
 import { BarChartContainerProps, BarChartDataPoint } from './types/chartComponentTypes';
+import { useDrag } from './common/DragContext';
 
 const BarChartContainer: React.FC<BarChartContainerProps> = ({
   dataType,
@@ -14,16 +15,17 @@ const BarChartContainer: React.FC<BarChartContainerProps> = ({
   availableDataTypes,
   onDelete,
 }) => {
+  const { globalOffset, handleDrag, toggleSync, resync } = useDrag();
   const [displayData, setDisplayData] = useState<BarChartDataPoint[]>([]);
   const [dataPoints, setDataPoints] = useState<number>(10);
   const [yAxisRange, setYAxisRange] = useState<{ min: number; max: number }>({ min: 0, max: 100 });
-  const [offset, setOffset] = useState<number>(0);
+  const [localOffset, setLocalOffset] = useState<number>(0);
+  const [isSynced, setIsSynced] = useState<boolean>(true);
   const [currentDataType, setCurrentDataType] = useState<string>(dataType);
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [startX, setStartX] = useState<number | null>(null);
 
   useEffect(() => {
-    // Clear existing data when the data type changes
     if (currentDataType !== dataType) {
       setDisplayData([]);
       setCurrentDataType(dataType);
@@ -43,11 +45,15 @@ const BarChartContainer: React.FC<BarChartContainerProps> = ({
     setDataPoints(newDataPoints);
   };
 
-  const handleDrag = (direction: 'left' | 'right') => {
-    setOffset((prevOffset) => {
-      const newOffset = direction === 'left' ? prevOffset - 10 : prevOffset + 10;
-      return Math.max(0, newOffset);
-    });
+  const handleLocalDrag = (direction: 'left' | 'right') => {
+    if (isSynced) {
+      handleDrag(direction);
+    } else {
+      setLocalOffset((prevOffset) => {
+        const newOffset = direction === 'left' ? prevOffset - 10 : prevOffset + 10;
+        return Math.max(0, newOffset);
+      });
+    }
   };
 
   const handleChartMouseDown = (event: React.MouseEvent) => {
@@ -62,7 +68,7 @@ const BarChartContainer: React.FC<BarChartContainerProps> = ({
       const deltaX = event.clientX - startX;
       if (Math.abs(deltaX) > 50) {
         const direction = deltaX > 0 ? 'right' : 'left';
-        handleDrag(direction);
+        handleLocalDrag(direction);
         setStartX(event.clientX); // Reset startX to the current position
       }
     }
@@ -74,6 +80,15 @@ const BarChartContainer: React.FC<BarChartContainerProps> = ({
     document.body.style.userSelect = ''; // Re-enable text selection
     document.body.style.cursor = ''; // Revert cursor to default
   };
+
+  const handleSyncToggle = () => {
+    if (!isSynced) {
+      setLocalOffset(globalOffset);
+    }
+    setIsSynced((prevSync) => !prevSync);
+  };
+
+  const offset = isSynced ? globalOffset : localOffset;
 
   return (
     <LatestDataComponent dataType={dataType}>
@@ -95,7 +110,6 @@ const BarChartContainer: React.FC<BarChartContainerProps> = ({
                 title={title}
                 dataType={dataType}
                 onDataTypeChange={(newDataType) => {
-                  // Clear existing data when the data type changes
                   setDisplayData([]);
                   onDataTypeChange(newDataType);
                 }}
@@ -129,6 +143,12 @@ const BarChartContainer: React.FC<BarChartContainerProps> = ({
                     <Bar dataKey="y" fill="#8884d8" />
                   </BarChart>
                 </ResponsiveContainer>
+              </div>
+              <div>
+                <label>
+                  <input type="checkbox" checked={isSynced} onChange={handleSyncToggle} />
+                  Sync Drag
+                </label>
               </div>
               <button onClick={onDelete} className="bg-red-500 text-white rounded px-4 py-2 mt-2">
                 Delete

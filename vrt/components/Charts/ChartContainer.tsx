@@ -4,6 +4,7 @@ import ChartComponent from './common/ChartComponent';
 import Header from './common/Header';
 import YAxisRangeComponent from './common/YAxisRangeComponent';
 import { ChartContainerProps } from './types/chartComponentTypes';
+import { useDrag } from '../Charts/common/DragContext';
 
 const ChartContainer: React.FC<ChartContainerProps> = ({
   dataType,
@@ -12,14 +13,15 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
   availableDataTypes,
   onDelete,
 }) => {
+  const { globalOffset, handleDrag, toggleSync, resync } = useDrag();
   const [displayData, setDisplayData] = useState<{ x: string, y: number, type: string }[]>([]);
   const [dataPoints, setDataPoints] = useState<number>(10);
   const [yAxisRange, setYAxisRange] = useState<{ min: number; max: number }>({ min: 0, max: 100 });
-  const [offset, setOffset] = useState<number>(0);
+  const [localOffset, setLocalOffset] = useState<number>(0);
+  const [isSynced, setIsSynced] = useState<boolean>(true);
   const [currentDataType, setCurrentDataType] = useState<string>(dataType);
 
   useEffect(() => {
-    // Clear existing data when the data type changes
     if (currentDataType !== dataType) {
       setDisplayData([]);
       setCurrentDataType(dataType);
@@ -35,16 +37,29 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
     console.log('Spike detected:', spike);
   };
 
-  const handleDrag = (direction: 'left' | 'right') => {
-    setOffset((prevOffset) => {
-      const newOffset = direction === 'right' ? prevOffset + 10 : prevOffset - 10;
-      return Math.max(0, newOffset);
-    });
+  const handleLocalDrag = (direction: 'left' | 'right') => {
+    if (isSynced) {
+      handleDrag(direction);
+    } else {
+      setLocalOffset((prevOffset) => {
+        const newOffset = direction === 'right' ? prevOffset + 10 : prevOffset - 10;
+        return Math.max(0, newOffset);
+      });
+    }
   };
 
   const handleDataPointsChange = (newDataPoints: number) => {
     setDataPoints(newDataPoints);
   };
+
+  const handleSyncToggle = () => {
+    if (!isSynced) {
+      setLocalOffset(globalOffset);
+    }
+    setIsSynced(!isSynced);
+  };
+
+  const offset = isSynced ? globalOffset : localOffset;
 
   return (
     <LatestDataComponent dataType={dataType}>
@@ -65,7 +80,6 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
               title={title}
               dataType={dataType}
               onDataTypeChange={(newDataType) => {
-                // Clear existing data when the data type changes
                 setDisplayData([]);
                 onDataTypeChange(newDataType);
               }}
@@ -80,7 +94,13 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
               onRangeChange={handleRangeChange}
               onSpikeDetected={handleSpikeDetected}
             />
-            <ChartComponent displayData={displayData} yAxisRange={yAxisRange} onDrag={handleDrag} />
+            <ChartComponent displayData={displayData} yAxisRange={yAxisRange} onDrag={handleLocalDrag} />
+            <div>
+              <label>
+                <input type="checkbox" checked={isSynced} onChange={handleSyncToggle} />
+                Sync Drag
+              </label>
+            </div>
             <button onClick={onDelete} className="bg-red-500 text-white rounded px-4 py-2 mt-2">
               Delete
             </button>
