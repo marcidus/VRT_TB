@@ -19,7 +19,6 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
   const [currentDataType, setCurrentDataType] = useState<string>(dataType);
 
   useEffect(() => {
-    // Clear existing data when the data type changes
     if (currentDataType !== dataType) {
       setDisplayData([]);
       setCurrentDataType(dataType);
@@ -27,8 +26,11 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
   }, [dataType, currentDataType]);
 
   const handleRangeChange = (filteredData: { x: string, y: number }[], min: number, max: number) => {
+    // Ensure correct ordering of min and max
+    const orderedMin = Math.min(min, max);
+    const orderedMax = Math.max(min, max);
+    setYAxisRange({ min: orderedMin, max: orderedMax });
     setDisplayData(filteredData.map(d => ({ ...d, type: 'historical' })));
-    setYAxisRange({ min, max });
   };
 
   const handleSpikeDetected = (spike: { x: string, y: number }) => {
@@ -56,8 +58,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
 
         const start = Math.max(0, combinedData.length - dataPoints - offset);
         const end = Math.max(0, combinedData.length - offset);
-        const displayData = combinedData.slice(start, end);
-        const currentValue = displayData.length ? displayData[displayData.length - 1].y : 0;
+        const visibleData = combinedData.slice(start, end);
 
         return (
           <div className="border-2 border-gray-400 rounded shadow p-2" style={{ width: '100%', height: '100%' }}>
@@ -65,17 +66,16 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
               title={title}
               dataType={dataType}
               onDataTypeChange={(newDataType) => {
-                // Clear existing data when the data type changes
                 setDisplayData([]);
                 onDataTypeChange(newDataType);
               }}
               availableDataTypes={availableDataTypes}
               dataPoints={dataPoints}
               onDataPointsChange={handleDataPointsChange}
-              currentValue={currentValue}
+              currentValue={visibleData.length ? visibleData[visibleData.length - 1].y : 0}
             />
             <YAxisRangeComponent
-              data={displayData}
+              data={visibleData}
               displayDataPoints={dataPoints}
               onRangeChange={handleRangeChange}
               onSpikeDetected={handleSpikeDetected}

@@ -7,31 +7,32 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  ResponsiveContainer
+  ResponsiveContainer,
+  BarChart,
+  Bar
 } from 'recharts';
 
-// Define the structure of a data point for the chart
 interface ChartDataPoint {
   x: string;
   y: number;
 }
 
-// Define the props for the ChartComponent
 interface ChartComponentProps {
   displayData: ChartDataPoint[];
   yAxisRange: { min: number, max: number };
-  onDrag: (direction: 'left' | 'right') => void; // Prop for handling drag
+  onDrag: (direction: 'left' | 'right') => void;
+  type?: 'line' | 'bar';  // Allows for both Line and Bar charts
 }
 
-const ChartComponent: React.FC<ChartComponentProps> = ({ displayData, yAxisRange, onDrag }) => {
+const ChartComponent: React.FC<ChartComponentProps> = ({ displayData, yAxisRange, onDrag, type = 'line' }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState<number | null>(null);
 
   const handleMouseDown = (event: React.MouseEvent) => {
     setIsDragging(true);
     setStartX(event.clientX);
-    document.body.style.userSelect = 'none'; // Prevent text selection
-    document.body.style.cursor = 'grabbing'; // Change cursor to grabbing
+    document.body.style.userSelect = 'none';
+    document.body.style.cursor = 'grabbing';
   };
 
   const handleMouseMove = (event: React.MouseEvent) => {
@@ -40,7 +41,7 @@ const ChartComponent: React.FC<ChartComponentProps> = ({ displayData, yAxisRange
       if (Math.abs(deltaX) > 50) {
         const direction = deltaX > 0 ? 'right' : 'left';
         onDrag(direction);
-        setStartX(event.clientX); // Reset startX to the current position
+        setStartX(event.clientX);
       }
     }
   };
@@ -48,8 +49,35 @@ const ChartComponent: React.FC<ChartComponentProps> = ({ displayData, yAxisRange
   const handleMouseUp = () => {
     setIsDragging(false);
     setStartX(null);
-    document.body.style.userSelect = ''; // Re-enable text selection
-    document.body.style.cursor = ''; // Revert cursor to default
+    document.body.style.userSelect = '';
+    document.body.style.cursor = '';
+  };
+
+  const renderChart = () => {
+    const orderedYAxisRange = {
+      min: Math.min(yAxisRange.min, yAxisRange.max),
+      max: Math.max(yAxisRange.min, yAxisRange.max),
+    };
+
+    return type === 'line' ? (
+      <LineChart data={displayData}>
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis dataKey="x" />
+        <YAxis domain={[orderedYAxisRange.min, orderedYAxisRange.max]} />
+        <Tooltip />
+        <Legend />
+        <Line type="monotone" dataKey="y" stroke="#8884d8" activeDot={{ r: 8 }} />
+      </LineChart>
+    ) : (
+      <BarChart data={displayData}>
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis dataKey="x" />
+        <YAxis domain={[orderedYAxisRange.min, orderedYAxisRange.max]} />
+        <Tooltip />
+        <Legend />
+        <Bar dataKey="y" fill="#8884d8" />
+      </BarChart>
+    );
   };
 
   return (
@@ -58,22 +86,10 @@ const ChartComponent: React.FC<ChartComponentProps> = ({ displayData, yAxisRange
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
-      style={{
-        cursor: isDragging ? 'grabbing' : 'grab',
-      }}
+      style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
     >
       <ResponsiveContainer width="100%" height={400}>
-        <LineChart data={displayData}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="x" />
-          <YAxis
-            domain={[yAxisRange.min, yAxisRange.max]}
-            tickFormatter={(value) => Math.round(value).toString()} // Format Y-axis ticks to integer strings
-          />
-          <Tooltip />
-          <Legend />
-          <Line type="monotone" dataKey="y" stroke="#8884d8" activeDot={{ r: 8 }} />
-        </LineChart>
+        {renderChart()}
       </ResponsiveContainer>
     </div>
   );

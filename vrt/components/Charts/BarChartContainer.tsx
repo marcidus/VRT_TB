@@ -4,7 +4,6 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import Header from './common/Header';
 import YAxisRangeComponent from './common/YAxisRangeComponent';
 import Draggable from 'react-draggable';
-import 'react-resizable/css/styles.css';
 import { BarChartContainerProps, BarChartDataPoint } from './types/chartComponentTypes';
 
 const BarChartContainer: React.FC<BarChartContainerProps> = ({
@@ -23,16 +22,18 @@ const BarChartContainer: React.FC<BarChartContainerProps> = ({
   const [startX, setStartX] = useState<number | null>(null);
 
   useEffect(() => {
-    // Clear existing data when the data type changes
     if (currentDataType !== dataType) {
       setDisplayData([]);
       setCurrentDataType(dataType);
     }
   }, [dataType, currentDataType]);
 
-  const handleRangeChange = (filteredData: { x: string, y: number }[], min: number, max: number) => {
-    setYAxisRange({ min, max });
-    setDisplayData(filteredData.map(d => ({ ...d, type: 'historical' })));
+  const handleRangeChange = (filteredData: { x: string; y: number }[], min: number, max: number) => {
+    // Ensure correct ordering of min and max
+    const orderedMin = Math.min(min, max);
+    const orderedMax = Math.max(min, max);
+    setYAxisRange({ min: orderedMin, max: orderedMax });
+    setDisplayData(filteredData.map(d => ({ ...d, source: 'filtered' })));
   };
 
   const handleSpikeDetected = (spike: { x: string, y: number }) => {
@@ -53,8 +54,8 @@ const BarChartContainer: React.FC<BarChartContainerProps> = ({
   const handleChartMouseDown = (event: React.MouseEvent) => {
     setIsDragging(true);
     setStartX(event.clientX);
-    document.body.style.userSelect = 'none'; // Prevent text selection
-    document.body.style.cursor = 'grabbing'; // Change cursor to grabbing
+    document.body.style.userSelect = 'none';
+    document.body.style.cursor = 'grabbing';
   };
 
   const handleChartMouseMove = (event: React.MouseEvent) => {
@@ -63,7 +64,7 @@ const BarChartContainer: React.FC<BarChartContainerProps> = ({
       if (Math.abs(deltaX) > 50) {
         const direction = deltaX > 0 ? 'right' : 'left';
         handleDrag(direction);
-        setStartX(event.clientX); // Reset startX to the current position
+        setStartX(event.clientX);
       }
     }
   };
@@ -71,22 +72,22 @@ const BarChartContainer: React.FC<BarChartContainerProps> = ({
   const handleChartMouseUp = () => {
     setIsDragging(false);
     setStartX(null);
-    document.body.style.userSelect = ''; // Re-enable text selection
-    document.body.style.cursor = ''; // Revert cursor to default
+    document.body.style.userSelect = '';
+    document.body.style.cursor = '';
   };
 
   return (
     <LatestDataComponent dataType={dataType}>
       {(historicalData, liveData) => {
-        const combinedData = [
-          ...historicalData.map(d => ({ x: d.timestamp, y: d.value, type: 'historical' })),
-          ...liveData.map(d => ({ x: d.timestamp, y: d.value, type: 'live' })),
+        const combinedData: BarChartDataPoint[] = [
+          ...historicalData.map(d => ({ x: d.timestamp, y: d.value, source: 'historical' })),
+          ...liveData.map(d => ({ x: d.timestamp, y: d.value, source: 'live' })),
         ];
 
         const start = Math.max(0, combinedData.length - dataPoints - offset);
         const end = Math.max(0, combinedData.length - offset);
-        const displayData = combinedData.slice(start, end);
-        const currentValue = displayData.length ? displayData[displayData.length - 1].y : 0;
+        const visibleData = combinedData.slice(start, end);
+        const currentValue = visibleData.length ? visibleData[visibleData.length - 1].y : 0;
 
         return (
           <Draggable handle=".handle-bar">
@@ -95,7 +96,6 @@ const BarChartContainer: React.FC<BarChartContainerProps> = ({
                 title={title}
                 dataType={dataType}
                 onDataTypeChange={(newDataType) => {
-                  // Clear existing data when the data type changes
                   setDisplayData([]);
                   onDataTypeChange(newDataType);
                 }}
@@ -105,7 +105,7 @@ const BarChartContainer: React.FC<BarChartContainerProps> = ({
                 currentValue={currentValue}
               />
               <YAxisRangeComponent
-                data={displayData}
+                data={visibleData}
                 displayDataPoints={dataPoints}
                 onRangeChange={handleRangeChange}
                 onSpikeDetected={handleSpikeDetected}
@@ -115,9 +115,7 @@ const BarChartContainer: React.FC<BarChartContainerProps> = ({
                 onMouseMove={handleChartMouseMove}
                 onMouseUp={handleChartMouseUp}
                 onMouseLeave={handleChartMouseUp}
-                style={{
-                  cursor: isDragging ? 'grabbing' : 'grab',
-                }}
+                style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
               >
                 <ResponsiveContainer width="100%" height={400}>
                   <BarChart data={displayData}>
