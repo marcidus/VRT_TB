@@ -15,12 +15,11 @@ const BarChartContainer: React.FC<BarChartContainerProps> = ({
   availableDataTypes,
   onDelete,
 }) => {
-  const { globalOffset, handleDrag, toggleSync, resync } = useDrag();
+  const { globalOffset, handleDrag, toggleSync, isSynced, lastSyncedOffset } = useDrag();
   const [displayData, setDisplayData] = useState<BarChartDataPoint[]>([]);
   const [dataPoints, setDataPoints] = useState<number>(10);
   const [yAxisRange, setYAxisRange] = useState<{ min: number; max: number }>({ min: 0, max: 100 });
   const [localOffset, setLocalOffset] = useState<number>(0);
-  const [isSynced, setIsSynced] = useState<boolean>(true);
   const [currentDataType, setCurrentDataType] = useState<string>(dataType);
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [startX, setStartX] = useState<number | null>(null);
@@ -50,7 +49,7 @@ const BarChartContainer: React.FC<BarChartContainerProps> = ({
       handleDrag(direction);
     } else {
       setLocalOffset((prevOffset) => {
-        const newOffset = direction === 'left' ? prevOffset - 10 : prevOffset + 10;
+        const newOffset = direction === 'right' ? prevOffset + 10 : prevOffset - 10;
         return Math.max(0, newOffset);
       });
     }
@@ -82,10 +81,11 @@ const BarChartContainer: React.FC<BarChartContainerProps> = ({
   };
 
   const handleSyncToggle = () => {
-    if (!isSynced) {
-      setLocalOffset(globalOffset);
+    if (isSynced) {
+      // When desyncing, set localOffset to the last synced position
+      setLocalOffset(lastSyncedOffset);
     }
-    setIsSynced((prevSync) => !prevSync);
+    toggleSync();
   };
 
   const offset = isSynced ? globalOffset : localOffset;

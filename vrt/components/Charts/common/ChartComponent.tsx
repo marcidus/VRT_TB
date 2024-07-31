@@ -10,13 +10,11 @@ import {
   ResponsiveContainer
 } from 'recharts';
 
-// Define the structure of a data point for the chart
 interface ChartDataPoint {
   x: string;
   y: number;
 }
 
-// Define the props for the ChartComponent
 interface ChartComponentProps {
   displayData: ChartDataPoint[];
   yAxisRange: { min: number, max: number };

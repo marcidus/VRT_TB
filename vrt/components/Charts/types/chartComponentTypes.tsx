@@ -47,6 +47,7 @@ export interface ChartContainerProps {
   onDelete: () => void;
   globalOffset: number; // Add this line
   setGlobalOffset: React.Dispatch<React.SetStateAction<number>>; // Add this line
+  
 }
 
 // Props for PieChartContainer component

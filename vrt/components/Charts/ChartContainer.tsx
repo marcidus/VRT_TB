@@ -13,7 +13,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
   availableDataTypes,
   onDelete,
 }) => {
-  const { globalOffset, handleDrag, toggleSync, resync } = useDrag();
+  const { globalOffset, handleDrag, toggleSync, lastSyncedOffset } = useDrag();
   const [displayData, setDisplayData] = useState<{ x: string, y: number, type: string }[]>([]);
   const [dataPoints, setDataPoints] = useState<number>(10);
   const [yAxisRange, setYAxisRange] = useState<{ min: number; max: number }>({ min: 0, max: 100 });
@@ -54,9 +54,10 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
 
   const handleSyncToggle = () => {
     if (!isSynced) {
-      setLocalOffset(globalOffset);
+      setLocalOffset(lastSyncedOffset); // Set local offset to the last synced position
     }
     setIsSynced(!isSynced);
+    toggleSync();
   };
 
   const offset = isSynced ? globalOffset : localOffset;
