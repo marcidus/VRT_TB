@@ -9,7 +9,7 @@ export interface ChartItem {
   id: string; // Unique identifier for the chart item
   title: string; // Title of the chart
   dataType: string; // Data type that the chart represents
-  chartType: 'line' | 'bar' | 'pie'; // Type of the chart
+  chartType: 'line' | 'bar'; // Type of the chart
   x: number; // X-coordinate of the chart's position
   y: number; // Y-coordinate of the chart's position
   width: number; // Width of the chart

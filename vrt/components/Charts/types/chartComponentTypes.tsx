@@ -47,15 +47,6 @@ export interface ChartContainerProps {
   onDelete: () => void;
 }
 
-// Props for PieChartContainer component
-export interface PieChartContainerProps {
-  dataType: string;
-  title: string;
-  onDataTypeChange: (newDataType: string) => void;
-  availableDataTypes: string[];
-  onDelete: () => void;
-}
-
 // Props for BarChartContainer component
 export interface BarChartContainerProps {
   dataType: string;

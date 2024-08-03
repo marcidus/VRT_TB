@@ -64,6 +64,7 @@ const AddChartForm: React.FC<AddChartFormProps> = ({ availableDataTypes, onAddCh
         >
           <option value="line">Line Chart</option>
           <option value="bar">Bar Chart</option>
+          <option value="pie">Pie Chart</option>
           <option value="car">Car Data Display</option>
         </select>
       </div>

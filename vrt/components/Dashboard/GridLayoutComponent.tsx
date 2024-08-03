@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ChartContainer from '../Charts/ChartContainer';
 import BarChartContainer from '../Charts/BarChartContainer';
-import PieChartContainer from '../Charts/PieChartContainer';
 import AddChartForm from './AddChartForm';
 import CarDataDisplay from '../Charts/CarDataDisplay';
 import Draggable, { DraggableEvent, DraggableData } from 'react-draggable';
@@ -235,15 +234,6 @@ const GridLayoutComponent: React.FC<GridLayoutComponentProps> = ({ charts: initi
               )}
               {'chartType' in item && item.chartType === 'bar' && (
                 <BarChartContainer
-                  dataType={item.dataType}
-                  title={item.title}
-                  onDataTypeChange={(newDataType) => handleDataTypeChange(index, newDataType)}
-                  availableDataTypes={availableDataTypes}
-                  onDelete={() => handleDeleteChart(index)}
-                />
-              )}
-              {'chartType' in item && item.chartType === 'pie' && (
-                <PieChartContainer
                   dataType={item.dataType}
                   title={item.title}
                   onDataTypeChange={(newDataType) => handleDataTypeChange(index, newDataType)}
