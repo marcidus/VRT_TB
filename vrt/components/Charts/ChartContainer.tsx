@@ -4,6 +4,7 @@ import ChartComponent from './common/ChartComponent';
 import Header from './common/Header';
 import YAxisRangeComponent from './common/YAxisRangeComponent';
 import { ChartContainerProps } from './types/chartComponentTypes';
+import './ChartContainer.css'; // Import the CSS file
 
 const ChartContainer: React.FC<ChartContainerProps> = ({
   dataType,
@@ -61,19 +62,21 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
         const visibleData = combinedData.slice(start, end);
 
         return (
-          <div className="border-2 border-gray-400 rounded shadow p-2" style={{ width: '100%', height: '100%' }}>
-            <Header
-              title={title}
-              dataType={dataType}
-              onDataTypeChange={(newDataType) => {
-                setDisplayData([]);
-                onDataTypeChange(newDataType);
-              }}
-              availableDataTypes={availableDataTypes}
-              dataPoints={dataPoints}
-              onDataPointsChange={handleDataPointsChange}
-              currentValue={visibleData.length ? visibleData[visibleData.length - 1].y : 0}
-            />
+          <div className="chart-container">
+            <div className="header-container">
+              <Header
+                title={title}
+                dataType={dataType}
+                onDataTypeChange={(newDataType) => {
+                  setDisplayData([]);
+                  onDataTypeChange(newDataType);
+                }}
+                availableDataTypes={availableDataTypes}
+                dataPoints={dataPoints}
+                onDataPointsChange={handleDataPointsChange}
+                currentValue={visibleData.length ? visibleData[visibleData.length - 1].y : 0}
+              />
+            </div>
             <YAxisRangeComponent
               data={visibleData}
               displayDataPoints={dataPoints}
@@ -81,7 +84,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
               onSpikeDetected={handleSpikeDetected}
             />
             <ChartComponent displayData={displayData} yAxisRange={yAxisRange} onDrag={handleDrag} />
-            <button onClick={onDelete} className="bg-red-500 text-white rounded px-4 py-2 mt-2">
+            <button onClick={onDelete} className="delete-button">
               Delete
             </button>
           </div>

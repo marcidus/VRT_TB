@@ -1,6 +1,5 @@
 import React from 'react';
 import GridLayoutComponent from './GridLayoutComponent';
-import { DashboardItem } from './DashboardItemTypes';
 import DashboardList from './DashboardList';
 import { useDashboardManager } from './useDashboardManager';
 
@@ -10,7 +9,7 @@ interface DashboardManagerProps {
 
 const DashboardManager: React.FC<DashboardManagerProps> = ({ onTitleChange }) => {
   const {
-    dashboards,
+    dashboardGroups,
     selectedDashboard,
     dashboardStates,
     addDashboard,
@@ -19,28 +18,36 @@ const DashboardManager: React.FC<DashboardManagerProps> = ({ onTitleChange }) =>
     selectDashboard,
     updateCharts,
     updateSelectedDataTypes,
+    onCreateGroup,
+    onRenameGroup,
+    onDeleteGroup,
   } = useDashboardManager(onTitleChange);
 
   return (
     <div>
       <DashboardList
-        dashboards={dashboards}
+        dashboardGroups={dashboardGroups}
         selectedDashboard={selectedDashboard}
         onSelectDashboard={selectDashboard}
         onRenameDashboard={renameDashboard}
         onDeleteDashboard={deleteDashboard}
         onAddDashboard={addDashboard}
+        onCreateGroup={onCreateGroup}
+        onRenameGroup={onRenameGroup}
+        onDeleteGroup={onDeleteGroup}
       />
-      {dashboards.map(dashboard =>
-        dashboard.id === selectedDashboard && dashboardStates[dashboard.id] ? (
-          <GridLayoutComponent
-            key={dashboard.id}
-            charts={dashboardStates[dashboard.id].charts}
-            selectedDataTypes={dashboardStates[dashboard.id].selectedDataTypes}
-            onUpdateCharts={(charts) => updateCharts(dashboard.id, charts)}
-            onUpdateSelectedDataTypes={(selectedDataTypes) => updateSelectedDataTypes(dashboard.id, selectedDataTypes)}
-          />
-        ) : null
+      {dashboardGroups.map(group =>
+        group.dashboards.map(dashboard =>
+          dashboard.id === selectedDashboard && dashboardStates[dashboard.id] ? (
+            <GridLayoutComponent
+              key={dashboard.id}
+              charts={dashboardStates[dashboard.id].charts}
+              selectedDataTypes={dashboardStates[dashboard.id].selectedDataTypes}
+              onUpdateCharts={(charts) => updateCharts(dashboard.id, charts)}
+              onUpdateSelectedDataTypes={(selectedDataTypes) => updateSelectedDataTypes(dashboard.id, selectedDataTypes)}
+            />
+          ) : null
+        )
       )}
     </div>
   );

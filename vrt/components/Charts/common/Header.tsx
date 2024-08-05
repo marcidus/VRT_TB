@@ -26,12 +26,11 @@ const Header: React.FC<HeaderProps> = ({
   }, [availableDataTypes]);
 
   return (
-    <div className="header-container border-b border-gray-400">
-      <div className="header bg-gray-800 p-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-white handle-bar cursor-move">{title}</h2>
-        <div className="flex items-center">
+    <div>
+      <div>
+        <h2>{title}</h2>
+        <div>
           <select
-            className="ml-2 bg-white border border-gray-300 rounded"
             value={dataType}
             onChange={(e) => onDataTypeChange(e.target.value)}
           >
@@ -41,7 +40,7 @@ const Header: React.FC<HeaderProps> = ({
               </option>
             ))}
           </select>
-          <label className="ml-4 text-white">Points:</label>
+          <label>Points:</label>
           <input
             type="range"
             min="1"
@@ -50,8 +49,8 @@ const Header: React.FC<HeaderProps> = ({
             onChange={(e) => onDataPointsChange(parseInt(e.target.value))}
             className="ml-2"
           />
-          <span className="ml-2 text-white">{dataPoints}</span>
-          <span className="ml-4 text-white">Current: {currentValue}</span>
+          <span>{dataPoints}</span>
+          <span >Current: {currentValue}</span>
         </div>
       </div>
     </div>

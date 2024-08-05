@@ -1,0 +1,121 @@
+/* General container for the BarChart */
+.bar-chart-container {
+    display: flex;
+    flex-direction: column;
+    background-color: #2a2a2a;
+    border-radius: 8px;
+    overflow: hidden;
+    padding: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    color: white;
+    font-family: 'Arial', sans-serif;
+}
+
+/* Header and current value container */
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.chart-header-title {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.current-value {
+    font-size: 32px;
+    font-weight: bold;
+    color: #28a745;
+}
+
+/* Styling for the data details */
+.data-details {
+    font-size: 14px;
+    color: #ccc;
+    margin-bottom: 10px;
+}
+
+.data-details strong {
+    color: #f8f9fa;
+}
+
+/* Styling for the range selection and spike detection */
+.y-axis-range-component {
+    background-color: #333;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+}
+
+.range-slider,
+.points-slider {
+    margin-top: 10px;
+}
+
+.spike-detection {
+    background-color: #444;
+    padding: 10px;
+    border-radius: 4px;
+    color: #ffbaba;
+    margin-bottom: 15px;
+}
+
+/* Custom scroll styling */
+.bar-chart-scrollable {
+    overflow: hidden;
+    cursor: grab;
+}
+
+.bar-chart-scrollable:active {
+    cursor: grabbing;
+}
+
+/* Button styling */
+.bar-chart-container .delete-button {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    margin-top: 10px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.bar-chart-container .delete-button:hover {
+    background-color: #c82333;
+}
+
+/* Resizing and Draggable styling */
+.react-draggable {
+    position: relative;
+}
+
+.resizable-box {
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #3b3b3b;
+    border: 1px solid #444;
+}
+
+.resizable-box .react-resizable-handle {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: #007bff;
+    bottom: 0;
+    right: 0;
+    cursor: se-resize;
+}
+
+/* Tooltip and Legend styling */
+.recharts-default-tooltip {
+    background-color: #333 !important;
+    border: 1px solid #555 !important;
+}
+
+.recharts-legend-item text {
+    fill: #ccc !important;
+}

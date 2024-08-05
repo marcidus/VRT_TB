@@ -1,0 +1,31 @@
+/* HeaderToggleButton.css */
+
+.header-toggle-button-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+.header-toggle-button {
+  background-color: #2a2a2a;
+  color: #ffffff;
+  border: 2px solid #444;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-size: 16px;
+}
+
+.header-toggle-button:hover {
+  background-color: #555;
+}
+
+.header-toggle-button.bg-green {
+  background-color: #28a745;
+}
+
+.header-toggle-button.bg-red {
+  background-color: #dc3545;
+}

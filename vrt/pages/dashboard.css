@@ -1,0 +1,116 @@
+/* Global Styles */
+body {
+    background-color: #1e1e1e;
+    color: #c0c0c0;
+    font-family: Arial, sans-serif;
+  }
+  
+  /* Dashboard Container */
+  .dashboard-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    background-color: #2d2d2d;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+  }
+  
+  /* Titles and Headings */
+  h1, h2, h3 {
+    color: #ffffff;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  /* Buttons and Inputs */
+  button, select, input[type="text"], input[type="range"] {
+    background-color: #3a3a3a;
+    color: #ffffff;
+    border: 1px solid #555;
+    padding: 5px 10px;
+    border-radius: 5px;
+    margin: 5px;
+  }
+  
+  button:hover, select:hover, input[type="text"]:hover, input[type="range"]:hover {
+    background-color: #555;
+    cursor: pointer;
+  }
+  
+  /* Chart Containers */
+  .chart-container, .draggable-resizable-box {
+    width: 100%;
+    max-width: 800px;
+    margin: 20px 0;
+    background-color: #2a2a2a;
+    border: 1px solid #555;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  }
+  
+  .chart-container:hover, .draggable-resizable-box:hover {
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+  }
+  
+  /* Chart Header */
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  .chart-header h2 {
+    margin: 0;
+    font-size: 1.5em;
+    color: #87CEEB;
+  }
+  
+  .chart-header select, .chart-header input[type="range"] {
+    max-width: 200px;
+  }
+  
+  .chart-header .current-value {
+    font-size: 1.2em;
+    color: #FFD700;
+  }
+  
+  /* Dashboard Templates */
+  .dashboard-templates {
+    text-align: center;
+  }
+  
+  .dashboard-templates h3 {
+    color: #ffffff;
+  }
+  
+  .dashboard-templates ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .dashboard-templates ul li {
+    background-color: #3a3a3a;
+    margin: 5px 0;
+    padding: 10px;
+    border-radius: 5px;
+  }
+  
+  .dashboard-templates ul li button {
+    margin-left: 10px;
+  }
+  
+  /* Popup Message */
+  .popup-message {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background-color: #444;
+    color: white;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  }
+  

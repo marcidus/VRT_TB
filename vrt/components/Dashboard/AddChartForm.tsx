@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import './AddChartForm.css'; // Import the CSS file
 
 interface AddChartFormProps {
   availableDataTypes: string[];
@@ -9,6 +10,7 @@ const AddChartForm: React.FC<AddChartFormProps> = ({ availableDataTypes, onAddCh
   const [title, setTitle] = useState(''); 
   const [dataType, setDataType] = useState(availableDataTypes[0] || ''); 
   const [chartType, setChartType] = useState<'line' | 'bar' | 'car'>('line'); 
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (availableDataTypes.length > 0 && !dataType) {
@@ -18,60 +20,73 @@ const AddChartForm: React.FC<AddChartFormProps> = ({ availableDataTypes, onAddCh
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Adding chart:", { title, dataType, chartType }); // Debug log
     onAddChart(title, dataType, chartType);
     setTitle('');
     setDataType(availableDataTypes[0] || '');
     setChartType('line');
+    setSidebarOpen(false); // Close the sidebar after adding the chart
+  };
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="mb-4">
-      <div className="mb-2">
-        <label className="mr-2">Title:</label>
-        <input
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="border rounded p-1"
-          required
-          disabled={chartType === 'car'}
-        />
-      </div>
-      <div className="mb-2">
-        <label className="mr-2">Data Type:</label>
-        <select
-          value={dataType}
-          onChange={(e) => setDataType(e.target.value)}
-          className="border rounded p-1"
-          required
-          disabled={chartType === 'car'}
-        >
-          {availableDataTypes.map((type) => (
-            <option key={type} value={type}>
-              {type}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="mb-2">
-        <label className="mr-2">Chart Type:</label>
-        <select
-          value={chartType}
-          onChange={(e) => setChartType(e.target.value as 'line' | 'bar' | 'car')}
-          className="border rounded p-1"
-          required
-        >
-          <option value="line">Line Chart</option>
-          <option value="bar">Bar Chart</option>
-          <option value="pie">Pie Chart</option>
-          <option value="car">Car Data Display</option>
-        </select>
-      </div>
-      <button type="submit" className="bg-blue-500 text-white rounded px-4 py-2">
-        Add Chart
+    <>
+      <button className="hamburger-button" onClick={toggleSidebar}>
+        ☰
       </button>
-    </form>
+      <div className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
+        <form onSubmit={handleSubmit} className="add-chart-form">
+          <div className="form-group">
+            <label htmlFor="title">Title:</label>
+            <input
+              type="text"
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+              disabled={chartType === 'car'}
+              className="form-control"
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="dataType">Data Type:</label>
+            <select
+              id="dataType"
+              value={dataType}
+              onChange={(e) => setDataType(e.target.value)}
+              required
+              disabled={chartType === 'car'}
+              className="form-control"
+            >
+              {availableDataTypes.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="form-group">
+            <label htmlFor="chartType">Chart Type:</label>
+            <select
+              id="chartType"
+              value={chartType}
+              onChange={(e) => setChartType(e.target.value as 'line' | 'bar' | 'car')}
+              required
+              className="form-control"
+            >
+              <option value="line">Line Chart</option>
+              <option value="bar">Bar Chart</option>
+              <option value="car">Car Data Display</option>
+            </select>
+          </div>
+          <button type="submit" className="submit-button">
+            Add Chart
+          </button>
+        </form>
+      </div>
+    </>
   );
 };
 

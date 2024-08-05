@@ -1,4 +1,3 @@
-// useDashboardManager.ts
 import { useState } from 'react';
 import { DashboardItem } from './DashboardItemTypes';
 
@@ -7,13 +6,21 @@ interface Dashboard {
   name: string;
 }
 
+interface DashboardGroup {
+  id: string;
+  name: string;
+  dashboards: Dashboard[];
+}
+
 export interface DashboardState {
   charts: DashboardItem[];
   selectedDataTypes: { [key: string]: string };
 }
 
 export const useDashboardManager = (onTitleChange: (title: string) => void) => {
-  const [dashboards, setDashboards] = useState<Dashboard[]>([{ id: '1', name: 'Dashboard 1' }]);
+  const [dashboardGroups, setDashboardGroups] = useState<DashboardGroup[]>([
+    { id: '1', name: 'Default Group', dashboards: [{ id: '1', name: 'Dashboard 1' }] }
+  ]);
   const [selectedDashboard, setSelectedDashboard] = useState<string>('1');
   const [dashboardStates, setDashboardStates] = useState<{ [key: string]: DashboardState }>({
     '1': {
@@ -28,51 +35,75 @@ export const useDashboardManager = (onTitleChange: (title: string) => void) => {
     }
   });
 
-  const addDashboard = () => {
-    const newId = (dashboards.length + 1).toString();
-    const newDashboard = { id: newId, name: `New Dashboard ${newId}` };
-    setDashboards([...dashboards, newDashboard]);
-    setSelectedDashboard(newId);
-    onTitleChange(newDashboard.name);
-    setDashboardStates(prev => ({
-      ...prev,
-      [newId]: {
-        charts: [],
-        selectedDataTypes: {
-          Left_Front_Wheel: '',
-          Right_Front_Wheel: '',
-          Left_Back_Wheel: '',
-          Right_Back_Wheel: '',
-          Battery: ''
+  const addDashboard = (groupId: string) => {
+    setDashboardGroups(prevGroups => {
+      const updatedGroups = prevGroups.map(group => {
+        if (group.id === groupId) {
+          const newId = `${Date.now()}`; // Use unique timestamp as ID
+          const newDashboard = { id: newId, name: `New Dashboard ${newId}` };
+          group.dashboards.push(newDashboard);
+          setSelectedDashboard(newId);
+          onTitleChange(newDashboard.name);
+          setDashboardStates(prev => ({
+            ...prev,
+            [newId]: {
+              charts: [],
+              selectedDataTypes: {
+                Left_Front_Wheel: '',
+                Right_Front_Wheel: '',
+                Left_Back_Wheel: '',
+                Right_Back_Wheel: '',
+                Battery: ''
+              }
+            }
+          }));
         }
-      }
-    }));
+        return group;
+      });
+      return [...updatedGroups];
+    });
   };
 
-  const deleteDashboard = (id: string) => {
-    if (id === '1') return;
-    const newDashboards = dashboards.filter(dashboard => dashboard.id !== id);
-    setDashboards(newDashboards);
-    if (selectedDashboard === id && newDashboards.length > 0) {
-      setSelectedDashboard(newDashboards[0].id);
-      onTitleChange(newDashboards[0].name);
-    } else if (newDashboards.length === 0) {
-      addDashboard();
-    }
+  const deleteDashboard = (groupId: string, dashboardId: string) => {
+    if (dashboardId === '1') return;
+    setDashboardGroups(prevGroups => {
+      const updatedGroups = prevGroups.map(group => {
+        if (group.id === groupId) {
+          group.dashboards = group.dashboards.filter(dashboard => dashboard.id !== dashboardId);
+        }
+        return group;
+      });
+      const selectedDashboardExists = updatedGroups.some(group =>
+        group.dashboards.some(dashboard => dashboard.id === selectedDashboard)
+      );
+      if (!selectedDashboardExists && updatedGroups.length > 0) {
+        const newSelected = updatedGroups[0].dashboards[0]?.id || '';
+        setSelectedDashboard(newSelected);
+        onTitleChange(updatedGroups[0].dashboards[0]?.name || '');
+      }
+      return [...updatedGroups];
+    });
     setDashboardStates(prev => {
-      const { [id]: _, ...rest } = prev;
+      const { [dashboardId]: _, ...rest } = prev;
       return rest;
     });
   };
 
-  const renameDashboard = (oldDashboardId: string, newDashboardName: string) => {
-    const newDashboards = dashboards.map(dashboard =>
-      dashboard.id === oldDashboardId ? { ...dashboard, name: newDashboardName } : dashboard
-    );
-    setDashboards(newDashboards);
-    if (selectedDashboard === oldDashboardId) {
-      onTitleChange(newDashboardName);
-    }
+  const renameDashboard = (groupId: string, dashboardId: string, newDashboardName: string) => {
+    setDashboardGroups(prevGroups => {
+      const updatedGroups = prevGroups.map(group => {
+        if (group.id === groupId) {
+          group.dashboards = group.dashboards.map(dashboard =>
+            dashboard.id === dashboardId ? { ...dashboard, name: newDashboardName } : dashboard
+          );
+        }
+        return group;
+      });
+      if (selectedDashboard === dashboardId) {
+        onTitleChange(newDashboardName);
+      }
+      return [...updatedGroups];
+    });
   };
 
   const selectDashboard = (id: string, name: string) => {
@@ -100,8 +131,44 @@ export const useDashboardManager = (onTitleChange: (title: string) => void) => {
     }));
   };
 
+  const onCreateGroup = (groupName: string) => {
+    const newGroupId = `${Date.now()}`; // Use unique timestamp as ID
+    setDashboardGroups(prevGroups => [
+      ...prevGroups,
+      { id: newGroupId, name: groupName, dashboards: [] }
+    ]);
+  };
+
+  const onRenameGroup = (groupId: string, newName: string) => {
+    setDashboardGroups(prevGroups =>
+      prevGroups.map(group =>
+        group.id === groupId ? { ...group, name: newName } : group
+      )
+    );
+  };
+
+  const onDeleteGroup = (groupId: string) => {
+    setDashboardGroups(prevGroups => {
+      const updatedGroups = prevGroups.filter(group => group.id !== groupId);
+      if (selectedDashboard && !updatedGroups.some(group => group.dashboards.some(d => d.id === selectedDashboard))) {
+        const newSelected = updatedGroups[0]?.dashboards[0]?.id || '';
+        setSelectedDashboard(newSelected);
+        onTitleChange(updatedGroups[0]?.dashboards[0]?.name || '');
+      }
+      // Delete associated dashboard states
+      setDashboardStates(prev => {
+        const newState = { ...prev };
+        prevGroups.find(group => group.id === groupId)?.dashboards.forEach(dashboard => {
+          delete newState[dashboard.id];
+        });
+        return newState;
+      });
+      return updatedGroups;
+    });
+  };
+
   return {
-    dashboards,
+    dashboardGroups,
     selectedDashboard,
     dashboardStates,
     addDashboard,
@@ -110,5 +177,8 @@ export const useDashboardManager = (onTitleChange: (title: string) => void) => {
     selectDashboard,
     updateCharts,
     updateSelectedDataTypes,
+    onCreateGroup,
+    onRenameGroup,
+    onDeleteGroup,
   };
 };

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import DashboardManager from '../components/Dashboard/DashboardManager';
+import './dashboard.css';
 
 const Dashboard: React.FC = () => {
   const [title, setTitle] = useState<string>('Dashboard');
@@ -9,8 +10,8 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">{title}</h1>
+    <div className="dashboard-container">
+      <h1>{title}</h1>
       <DashboardManager onTitleChange={handleTitleChange} />
     </div>
   );

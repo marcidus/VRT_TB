@@ -91,7 +91,7 @@ const BarChartContainer: React.FC<BarChartContainerProps> = ({
 
         return (
           <Draggable handle=".handle-bar">
-            <div className="border-2 border-gray-400 rounded shadow p-2" style={{ width: '100%', height: '100%' }}>
+            <div style={{ width: '100%', height: '100%' }}>
               <Header
                 title={title}
                 dataType={dataType}
@@ -128,7 +128,7 @@ const BarChartContainer: React.FC<BarChartContainerProps> = ({
                   </BarChart>
                 </ResponsiveContainer>
               </div>
-              <button onClick={onDelete} className="bg-red-500 text-white rounded px-4 py-2 mt-2">
+              <button onClick={onDelete}>
                 Delete
               </button>
             </div>

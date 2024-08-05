@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { DataService } from '../Data/DataService'; // Import DataService
+import { DataService } from '../Data/DataService';
+import './HeaderToggleButton.css'; // Import the CSS file
 
 // Props for the HeaderToggleButton component
 interface HeaderToggleButtonProps {
@@ -36,11 +37,10 @@ const HeaderToggleButton: React.FC<HeaderToggleButtonProps> = ({ headersUpdated,
   };
 
   return (
-    <div className="mb-4">
+    <div className="header-toggle-button-container">
       <button
         onClick={handleToggle}
-        className={`px-4 py-2 rounded ${headersUpdated ? 'bg-green-500' : 'bg-red-500'} text-white`}
-        style={{ zIndex: 1000 }} // Ensure it is on top
+        className={`header-toggle-button ${headersUpdated ? 'bg-green' : 'bg-red'}`}
       >
         {headersUpdated ? 'Disable Header Updates' : 'Enable Header Updates'}
       </button>

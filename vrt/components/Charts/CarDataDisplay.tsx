@@ -5,6 +5,7 @@ import { FaCar, FaTrash } from 'react-icons/fa';
 import LatestLiveDataComponent from '../Data/LatestLiveDataComponent';
 import { CarDataDisplayProps } from './types/chartComponentTypes';
 import { DataService } from '../Data/DataService';
+import './CarDataDisplay.css'; // Import the CSS file
 
 const CarDataDisplay: React.FC<CarDataDisplayProps> = ({
   onDelete,
@@ -30,14 +31,12 @@ const CarDataDisplay: React.FC<CarDataDisplayProps> = ({
   });
 
   useEffect(() => {
-    // Subscribe to the initial data types
     const dataService = DataService.getInstance();
     Object.keys(selectedDataTypes).forEach((key) => {
       dataService.subscribe(selectedDataTypes[key], () => {});
     });
 
     return () => {
-      // Unsubscribe from all data types on unmount
       Object.keys(selectedDataTypes).forEach((key) => {
         dataService.unsubscribe(selectedDataTypes[key], () => {});
       });
@@ -73,7 +72,6 @@ const CarDataDisplay: React.FC<CarDataDisplayProps> = ({
 
     onDataTypeChange(key, '');
 
-    // Unsubscribe from the data type
     const dataService = DataService.getInstance();
     dataService.unsubscribe(dataType, () => {});
   };
@@ -85,21 +83,21 @@ const CarDataDisplay: React.FC<CarDataDisplayProps> = ({
         onPositionChange(data.x, data.y);
       }}
     >
-      <div className="border-2 border-gray-400 rounded shadow p-2" style={{ width: '100%', height: '100%', position: 'relative' }}>
-        <div className="handle-bar h-4 bg-gray-600 rounded-t cursor-move flex justify-between items-center">
+      <div className="car-data-display-container">
+        <div className="handle-bar">
           <span>Car Data Display</span>
-          <button onClick={onDelete} className="bg-red-500 text-white rounded px-2 py-1">
-            Delete
+          <button onClick={onDelete} className="delete-button">
+            <FaTrash />
           </button>
         </div>
-        <button onClick={handleAddLabel} className="bg-blue-500 text-white rounded px-2 py-1 mt-2 mb-2">
+        <button onClick={handleAddLabel} className="add-label-button">
           Add Label
         </button>
-        <div style={{ position: 'relative', width: '100%', height: 'calc(100% - 40px)' }}>
+        <div className="car-image-container">
           <img
             src="/car.jpg"
             alt="Car"
-            style={{ width: '100%', height: '100%', objectFit: 'contain', position: 'absolute', top: 0, left: 0, zIndex: 1 }}
+            className="car-image"
           />
           {Object.keys(labels).map((key) => (
             <LatestLiveDataComponent key={`${key}-${selectedDataTypes[key]}`} dataType={selectedDataTypes[key]}>
@@ -111,35 +109,18 @@ const CarDataDisplay: React.FC<CarDataDisplayProps> = ({
                     setPositions({ ...positions, [key]: { x: data.x, y: data.y } });
                   }}
                 >
-                  <div
-                    style={{
-                      position: 'absolute',
-                      color: 'red',
-                      backgroundColor: 'white',
-                      padding: '2px',
-                      borderRadius: '4px',
-                      zIndex: 2,
-                      transform: 'translate(-50%, -50%)',
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '2px' }}>
+                  <div className="data-label">
+                    <div className="label-header">
                       <FaCar />
                       <input
                         type="text"
                         value={labels[key]}
                         onChange={(e) => handleLabelChange(key, e.target.value)}
-                        style={{
-                          backgroundColor: 'white',
-                          border: '1px solid gray',
-                          borderRadius: '4px',
-                          width: '100px',
-                          marginLeft: '2px',
-                        }}
+                        className="label-input"
                       />
                       <button
                         onClick={() => handleDeleteLabel(key)}
-                        className="ml-2 text-red-500"
-                        style={{ border: 'none', background: 'none', cursor: 'pointer' }}
+                        className="delete-label-button"
                       >
                         <FaTrash />
                       </button>
@@ -149,19 +130,14 @@ const CarDataDisplay: React.FC<CarDataDisplayProps> = ({
                       onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                         const newDataType = e.target.value;
                         onDataTypeChange(key, newDataType);
-
-                        // Unsubscribe from the old data type
                         const oldDataType = selectedDataTypes[key];
                         if (oldDataType) {
                           DataService.getInstance().unsubscribe(oldDataType, () => {});
                         }
-
-                        // Subscribe to the new data type
                         const dataService = DataService.getInstance();
                         dataService.subscribe(newDataType, () => {});
                       }}
-                      className="ml-2 bg-white border border-gray-300 rounded"
-                      style={{ width: '100px', marginBottom: '2px' }}
+                      className="data-select"
                     >
                       {availableDataTypes.map((type: string) => (
                         <option key={type} value={type}>
@@ -169,7 +145,7 @@ const CarDataDisplay: React.FC<CarDataDisplayProps> = ({
                         </option>
                       ))}
                     </select>
-                    <span>{latestData ? latestData.value : 'No Data'}</span>
+                    <span className="data-value">{latestData ? latestData.value : 'No Data'}</span>
                   </div>
                 </Draggable>
               )}
