@@ -47,7 +47,6 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
     });
   };
 
-  // Define the handleDataPointsChange function
   const handleDataPointsChange = (newDataPoints: number) => {
     setDataPoints(newDataPoints);
   };

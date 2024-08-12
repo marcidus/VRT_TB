@@ -8,6 +8,12 @@
     color: white;
     font-family: Arial, sans-serif;
     overflow: hidden;
+    cursor: grab; /* Added to indicate draggable behavior */
+}
+
+.car-data-display-container:active {
+    cursor: grabbing; /* Changes cursor when actively dragging */
+    z-index: 1000; /* Brings the dragged component to the front */
 }
 
 .handle-bar {
@@ -20,6 +26,7 @@
     align-items: center;
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
+    z-index: 2; /* Ensure handle bar is on top */
 }
 
 .delete-button {
@@ -55,6 +62,7 @@
     position: relative;
     width: 100%;
     height: calc(100% - 40px);
+    z-index: 1; /* Ensure image container stays behind labels */
 }
 
 .car-image {
@@ -64,27 +72,23 @@
     position: absolute;
     top: 0;
     left: 0;
-    z-index: 1;
 }
 
 .data-label {
     position: absolute;
     background-color: rgba(255, 255, 255, 0.8);
-    padding: 8px;
+    padding: 4px;
     border-radius: 4px;
-    z-index: 2;
     transform: translate(-50%, -50%);
     cursor: grab;
+    z-index: 2;
+    max-width: 200px;
+    font-size: 12px;
 }
 
 .data-label:active {
     cursor: grabbing;
-}
-
-.label-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 5px;
+    z-index: 1000; /* Brings the dragged label to the front */
 }
 
 .label-input {
@@ -94,7 +98,14 @@
     width: 100px;
     margin-left: 5px;
     padding: 2px 5px;
-    color: black; /* Ensure text is visible */
+    font-size: 12px;
+    color: black;
+}
+
+.label-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
 }
 
 .delete-label-button {
@@ -116,12 +127,12 @@
     border: 1px solid gray;
     border-radius: 4px;
     padding: 2px 5px;
-    color: black; /* Ensure text is visible */
+    color: black;
 }
 
 .data-select option {
     background-color: white;
-    color: black; /* Ensure text is visible in options */
+    color: black;
 }
 
 .data-value {

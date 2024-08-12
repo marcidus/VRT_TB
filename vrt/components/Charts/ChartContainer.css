@@ -1,130 +1,145 @@
-/* General container for the Chart */
-.chart-container, .bar-chart-container {
-    display: flex;
-    flex-direction: column;
-    background-color: #2a2a2a;
-    border-radius: 8px;
-    overflow: hidden;
-    padding: 15px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-    color: white;
-    font-family: 'Arial', sans-serif;
-    border: 1px solid #444; /* Ensure both have the same border */
+.chart-container {
+  display: flex;
+  flex-direction: column;
+  background-color: #2a2a2a;
+  border-radius: 8px;
+  overflow: hidden;
+  padding: 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Reduced shadow complexity */
+  color: white;
+  font-family: 'Arial', sans-serif;
+  border: 1px solid #444;
+  cursor: grab;
+  will-change: transform; /* Enables hardware acceleration */
 }
 
-/* Header and current value container */
+.chart-container:active {
+  cursor: grabbing;
+  z-index: 1000;
+}
+
 .header-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-    background-color: #333; /* Consistent header background */
-    padding: 10px;
-    border-radius: 4px 4px 0 0;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+  background-color: #333;
+  padding: 10px;
+  border-radius: 4px 4px 0 0;
+  z-index: 2;
 }
 
 .chart-header-title {
-    font-size: 20px;
-    font-weight: bold;
-    color: #f8f9fa;
+  font-size: 20px;
+  font-weight: bold;
+  color: #f8f9fa;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-content div {
+  display: flex;
+  align-items: center;
 }
 
 .current-value {
-    font-size: 32px;
-    font-weight: bold;
-    color: #28a745;
+  font-size: 32px;
+  font-weight: bold;
+  color: #28a745;
+  text-align: right;
 }
 
-/* Styling for the data details */
 .data-details {
-    font-size: 14px;
-    color: #ccc;
-    margin-bottom: 10px;
+  font-size: 14px;
+  color: #ccc;
+  margin-bottom: 10px;
 }
 
 .data-details strong {
-    color: #f8f9fa;
+  color: #f8f9fa;
 }
 
-/* Styling for the range selection and spike detection */
 .y-axis-range-component {
-    background-color: #333;
-    padding: 10px;
-    border-radius: 4px;
-    margin-bottom: 15px;
+  background-color: #333;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 15px;
 }
 
 .range-slider,
 .points-slider {
-    margin-top: 10px;
+  margin-top: 10px;
 }
 
 .spike-detection {
-    background-color: #444;
-    padding: 10px;
-    border-radius: 4px;
-    color: #ffbaba;
-    margin-bottom: 15px;
+  background-color: #444;
+  padding: 10px;
+  border-radius: 4px;
+  color: #ffbaba;
+  margin-bottom: 15px;
 }
 
-/* Custom scroll styling */
-.chart-scrollable, .bar-chart-scrollable {
-    overflow: hidden;
-    cursor: grab;
+.chart-scrollable {
+  overflow: hidden;
+  cursor: grab;
 }
 
-.chart-scrollable:active, .bar-chart-scrollable:active {
-    cursor: grabbing;
+.chart-scrollable:active {
+  cursor: grabbing;
 }
 
-/* Button styling */
-.chart-container .delete-button, .bar-chart-container .delete-button {
-    background-color: #dc3545;
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    margin-top: 10px;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: background-color 0.3s ease;
-    width: 100%; /* Ensure full width for both */
-    text-align: center;
+.chart-container .delete-button {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  margin-top: 10px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+  width: 100%;
+  text-align: center;
 }
 
-.chart-container .delete-button:hover, .bar-chart-container .delete-button:hover {
-    background-color: #c82333;
+.chart-container .delete-button:hover {
+  background-color: #c82333;
 }
 
-/* Resizing and Draggable styling */
 .react-draggable {
-    position: relative;
+  position: relative;
 }
 
 .resizable-box {
-    border-radius: 8px;
-    overflow: hidden;
-    background-color: #3b3b3b;
-    border: 1px solid #444;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #3b3b3b;
+  border: 1px solid #444;
+  will-change: transform; /* Enables hardware acceleration */
 }
 
 .resizable-box .react-resizable-handle {
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    background: #007bff;
-    bottom: 0;
-    right: 0;
-    cursor: se-resize;
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: #007bff;
+  bottom: 0;
+  right: 0;
+  cursor: se-resize;
+  will-change: transform; /* Enables hardware acceleration */
 }
 
-/* Tooltip and Legend styling */
 .recharts-default-tooltip {
-    background-color: #333 !important;
-    border: 1px solid #555 !important;
+  background-color: #333 !important;
+  border: 1px solid #555 !important;
 }
 
 .recharts-legend-item text {
-    fill: #ccc !important;
+  fill: #ccc !important;
 }
 
 .no-select {
