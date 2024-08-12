@@ -1,0 +1,29 @@
+.search-filter {
+    position: relative;
+    display: inline-block;
+    margin-left: 10px;
+    cursor: pointer;
+  }
+  
+  .filter-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: #3b3b3b;
+    border-radius: 4px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 5px;
+    z-index: 1000;
+  }
+  
+  .filter-option {
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    color: white;
+  }
+  
+  .filter-option:hover, .filter-option.selected {
+    background-color: #007bff;
+  }
+  

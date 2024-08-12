@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import './DashboardList.css'; // Import the CSS file
+import './DashboardList.css';
 import { IoMdAddCircle } from 'react-icons/io';
-import { FaTrashAlt, FaEdit } from 'react-icons/fa';
-import { FaChevronUp, FaChevronDown } from 'react-icons/fa';
+import { FaTrashAlt, FaEdit, FaChevronUp, FaChevronDown } from 'react-icons/fa';
+import SearchFilter from './SearchFilter'; // Import the new component
 
 interface Dashboard {
   id: string;
@@ -41,15 +41,46 @@ const DashboardList: React.FC<DashboardListProps> = ({
   const [isExpanded, setIsExpanded] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeGroup, setActiveGroup] = useState(dashboardGroups[0]?.id || '');
+  const [selectedFilter, setSelectedFilter] = useState('Relevance');
+
+  const sortDashboards = (dashboards: Dashboard[]) => {
+    switch (selectedFilter) {
+      case 'Alphabetical':
+        return dashboards.sort((a, b) => a.name.localeCompare(b.name));
+      case 'Creation Date':
+        return dashboards; // Implement your creation date sorting logic if available
+      case 'Relevance':
+      default:
+        return dashboards.sort((a, b) => {
+          const aIndex = a.name.toLowerCase().indexOf(searchTerm.toLowerCase());
+          const bIndex = b.name.toLowerCase().indexOf(searchTerm.toLowerCase());
+          if (aIndex === bIndex) {
+            return a.name.localeCompare(b.name); // Secondary alphabetical sorting
+          }
+          return aIndex - bIndex;
+        });
+    }
+  };
 
   const filteredGroups = dashboardGroups.map(group => ({
     ...group,
-    dashboards: group.dashboards.filter(dashboard =>
-      dashboard.name.toLowerCase().includes(searchTerm.toLowerCase())
+    dashboards: sortDashboards(
+      group.dashboards.filter(dashboard =>
+        dashboard.name.toLowerCase().includes(searchTerm.toLowerCase())
+      )
     ),
   }));
 
   const currentGroup = filteredGroups.find(group => group.id === activeGroup);
+
+  const handleDeleteGroup = (groupId: string, groupName: string) => {
+    if (window.confirm(`Are you sure you want to delete the group "${groupName}"?`)) {
+      onDeleteGroup(groupId);
+      if (activeGroup === groupId) {
+        setActiveGroup(filteredGroups[0]?.id || '');
+      }
+    }
+  };
 
   return (
     <div className={`dashboard-list ${isExpanded ? 'expanded' : 'collapsed'}`}>
@@ -58,13 +89,16 @@ const DashboardList: React.FC<DashboardListProps> = ({
       </div>
       {isExpanded && (
         <div className="dashboard-list-content">
-          <input
-            type="text"
-            className="search-bar"
-            placeholder="Search dashboards..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+          <div className="search-bar-container">
+            <input
+              type="text"
+              className="search-bar"
+              placeholder="Search dashboards..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <SearchFilter selectedFilter={selectedFilter} onFilterChange={setSelectedFilter} />
+          </div>
           <div className="group-tabs">
             {filteredGroups.map(group => (
               <div
@@ -81,17 +115,12 @@ const DashboardList: React.FC<DashboardListProps> = ({
                     if (newName) onRenameGroup(group.id, newName);
                   }}
                 />
-                {group.id !== '1' && (
+                {group.id !== activeGroup && group.id !== '1' && (
                   <FaTrashAlt
                     className="delete-group-icon"
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (window.confirm(`Are you sure you want to delete the group "${group.name}"?`)) {
-                        onDeleteGroup(group.id);
-                        if (activeGroup === group.id) {
-                          setActiveGroup(filteredGroups[0]?.id || '');
-                        }
-                      }
+                      handleDeleteGroup(group.id, group.name);
                     }}
                   />
                 )}
