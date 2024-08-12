@@ -82,6 +82,12 @@ const DashboardList: React.FC<DashboardListProps> = ({
     }
   };
 
+  const handleDeleteDashboard = (groupId: string, dashboardId: string, dashboardName: string) => {
+    if (window.confirm(`Are you sure you want to delete the dashboard "${dashboardName}"?`)) {
+      onDeleteDashboard(groupId, dashboardId);
+    }
+  };
+
   return (
     <div className={`dashboard-list ${isExpanded ? 'expanded' : 'collapsed'}`}>
       <div className="dashboard-list-header" onClick={() => setIsExpanded(!isExpanded)}>
@@ -156,7 +162,7 @@ const DashboardList: React.FC<DashboardListProps> = ({
                       className="delete-button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        onDeleteDashboard(currentGroup.id, dashboard.id);
+                        handleDeleteDashboard(currentGroup.id, dashboard.id, dashboard.name);
                       }}
                     >
                       <FaTrashAlt size={16} />
