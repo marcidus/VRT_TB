@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
+import Draggable from 'react-draggable';
 import { DashboardItem } from './DashboardItemTypes';
-import './DashboardTemplates.css'; // Import the CSS file
+import './DashboardTemplates.css';
+import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
 
 interface DashboardTemplatesProps {
   templates: { [key: string]: DashboardItem[] };
@@ -19,6 +21,17 @@ const DashboardTemplates: React.FC<DashboardTemplatesProps> = ({
   onRenameTemplate,
   onSaveTemplate
 }) => {
+  const [dropdownVisible, setDropdownVisible] = useState<{ [key: string]: boolean }>({});
+  const [isExpanded, setIsExpanded] = useState(true);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const toggleDropdown = (templateName: string) => {
+    setDropdownVisible(prevState => ({
+      ...prevState,
+      [templateName]: !prevState[templateName]
+    }));
+  };
+
   const handleExport = (templateName: string) => {
     const state = templates[templateName];
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
@@ -60,35 +73,66 @@ const DashboardTemplates: React.FC<DashboardTemplatesProps> = ({
     }
   };
 
+  const handleStart = () => {
+    setIsDragging(false);
+  };
+
+  const handleDrag = () => {
+    setIsDragging(true);
+  };
+
+  const handleStop = () => {
+    // Prevent click if the item was dragged
+    if (!isDragging) {
+      setIsExpanded(!isExpanded);
+    }
+    setIsDragging(false);
+  };
+
   return (
-    <div className="dashboard-templates">
-      <h3>Template Manager</h3>
-      <ul>
-        {Object.keys(templates).map((templateName) => (
-          <li key={templateName} className="template-item">
-            <span>{templateName}</span>
-            <div className="template-buttons">
-              <button onClick={() => onLoadTemplate(templateName)}>Load</button>
-              <button onClick={() => handleExport(templateName)}>Export</button>
-              <button onClick={() => handleRename(templateName)}>Rename</button>
-              <button onClick={() => handleDelete(templateName)}>Delete</button>
+    <Draggable onStart={handleStart} onDrag={handleDrag} onStop={handleStop} handle=".drag-handle">
+      <div className={`dashboard-templates ${isExpanded ? '' : 'retracted'}`}>
+        <div className="drag-handle" style={{ cursor: 'move', background: '#444', padding: '10px', borderRadius: '10px 10px 0 0' }}>
+          {isExpanded ? <FaChevronUp /> : <FaChevronDown />} Template Manager
+        </div>
+        {isExpanded && (
+          <>
+            <h3>List of Templates</h3>
+            <div className="template-list-container">
+              <ul className="template-list">
+                {Object.keys(templates).map((templateName) => (
+                  <li key={templateName} className="template-item">
+                    <div className="template-header" onClick={() => toggleDropdown(templateName)}>
+                      <span>{templateName}</span>
+                    </div>
+                    {dropdownVisible[templateName] && (
+                      <div className="template-dropdown">
+                        <button onClick={() => onLoadTemplate(templateName)}>Load</button>
+                        <button onClick={() => handleExport(templateName)}>Export</button>
+                        <button onClick={() => handleRename(templateName)}>Rename</button>
+                        <button onClick={() => handleDelete(templateName)}>Delete</button>
+                      </div>
+                    )}
+                  </li>
+                ))}
+              </ul>
             </div>
-          </li>
-        ))}
-      </ul>
-      <input type="file" onChange={handleImport} className="import-input" />
-      <button
-        className="save-template-button"
-        onClick={() => {
-          const templateName = prompt("Enter a name for the template:");
-          if (templateName) {
-            onSaveTemplate(templateName);
-          }
-        }}
-      >
-        Save as Template
-      </button>
-    </div>
+            <input type="file" onChange={handleImport} className="import-input" />
+            <button
+              className="save-template-button"
+              onClick={() => {
+                const templateName = prompt("Enter a name for the template:");
+                if (templateName) {
+                  onSaveTemplate(templateName);
+                }
+              }}
+            >
+              Save as Template
+            </button>
+          </>
+        )}
+      </div>
+    </Draggable>
   );
 };
 
