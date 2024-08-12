@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import Draggable from 'react-draggable';
 import LatestDataComponent from '../Data/LatestDataComponent';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import Header from './common/Header';
 import YAxisRangeComponent from './common/YAxisRangeComponent';
-import Draggable from 'react-draggable';
 import { BarChartContainerProps, BarChartDataPoint } from './types/chartComponentTypes';
+import "./BarChartContainer.css";
 
 const BarChartContainer: React.FC<BarChartContainerProps> = ({
   dataType,
@@ -29,7 +30,6 @@ const BarChartContainer: React.FC<BarChartContainerProps> = ({
   }, [dataType, currentDataType]);
 
   const handleRangeChange = (filteredData: { x: string; y: number }[], min: number, max: number) => {
-    // Ensure correct ordering of min and max
     const orderedMin = Math.min(min, max);
     const orderedMax = Math.max(min, max);
     setYAxisRange({ min: orderedMin, max: orderedMax });
@@ -54,7 +54,7 @@ const BarChartContainer: React.FC<BarChartContainerProps> = ({
   const handleChartMouseDown = (event: React.MouseEvent) => {
     setIsDragging(true);
     setStartX(event.clientX);
-    document.body.style.userSelect = 'none';
+    document.body.classList.add('no-select'); // Add the no-select class
     document.body.style.cursor = 'grabbing';
   };
 
@@ -72,70 +72,74 @@ const BarChartContainer: React.FC<BarChartContainerProps> = ({
   const handleChartMouseUp = () => {
     setIsDragging(false);
     setStartX(null);
-    document.body.style.userSelect = '';
+    document.body.classList.remove('no-select'); // Remove the no-select class
     document.body.style.cursor = '';
   };
 
   return (
-    <LatestDataComponent dataType={dataType}>
-      {(historicalData, liveData) => {
-        const combinedData: BarChartDataPoint[] = [
-          ...historicalData.map(d => ({ x: d.timestamp, y: d.value, source: 'historical' })),
-          ...liveData.map(d => ({ x: d.timestamp, y: d.value, source: 'live' })),
-        ];
+    <Draggable handle=".header-container">
+      <div className="bar-chart-container">
+        <LatestDataComponent dataType={dataType}>
+          {(historicalData, liveData) => {
+            const combinedData: BarChartDataPoint[] = [
+              ...historicalData.map(d => ({ x: d.timestamp, y: d.value, source: 'historical' })),
+              ...liveData.map(d => ({ x: d.timestamp, y: d.value, source: 'live' })),
+            ];
 
-        const start = Math.max(0, combinedData.length - dataPoints - offset);
-        const end = Math.max(0, combinedData.length - offset);
-        const visibleData = combinedData.slice(start, end);
-        const currentValue = visibleData.length ? visibleData[visibleData.length - 1].y : 0;
+            const start = Math.max(0, combinedData.length - dataPoints - offset);
+            const end = Math.max(0, combinedData.length - offset);
+            const visibleData = combinedData.slice(start, end);
+            const currentValue = visibleData.length ? visibleData[visibleData.length - 1].y : 0;
 
-        return (
-          <Draggable handle=".handle-bar">
-            <div style={{ width: '100%', height: '100%' }}>
-              <Header
-                title={title}
-                dataType={dataType}
-                onDataTypeChange={(newDataType) => {
-                  setDisplayData([]);
-                  onDataTypeChange(newDataType);
-                }}
-                availableDataTypes={availableDataTypes}
-                dataPoints={dataPoints}
-                onDataPointsChange={handleDataPointsChange}
-                currentValue={currentValue}
-              />
-              <YAxisRangeComponent
-                data={visibleData}
-                displayDataPoints={dataPoints}
-                onRangeChange={handleRangeChange}
-                onSpikeDetected={handleSpikeDetected}
-              />
-              <div
-                onMouseDown={handleChartMouseDown}
-                onMouseMove={handleChartMouseMove}
-                onMouseUp={handleChartMouseUp}
-                onMouseLeave={handleChartMouseUp}
-                style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
-              >
-                <ResponsiveContainer width="100%" height={400}>
-                  <BarChart data={displayData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="x" />
-                    <YAxis domain={[yAxisRange.min, yAxisRange.max]} />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="y" fill="#8884d8" />
-                  </BarChart>
-                </ResponsiveContainer>
+            return (
+              <div>
+                <div className="header-container">
+                  <Header
+                    title={title}
+                    dataType={dataType}
+                    onDataTypeChange={(newDataType) => {
+                      setDisplayData([]);
+                      onDataTypeChange(newDataType);
+                    }}
+                    availableDataTypes={availableDataTypes}
+                    dataPoints={dataPoints}
+                    onDataPointsChange={handleDataPointsChange}
+                    currentValue={currentValue}
+                  />
+                </div>
+                <YAxisRangeComponent
+                  data={visibleData}
+                  displayDataPoints={dataPoints}
+                  onRangeChange={handleRangeChange}
+                  onSpikeDetected={handleSpikeDetected}
+                />
+                <div
+                  onMouseDown={handleChartMouseDown}
+                  onMouseMove={handleChartMouseMove}
+                  onMouseUp={handleChartMouseUp}
+                  onMouseLeave={handleChartMouseUp}
+                  style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+                >
+                  <ResponsiveContainer width="100%" height={400}>
+                    <BarChart data={displayData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="x" />
+                      <YAxis domain={[yAxisRange.min, yAxisRange.max]} />
+                      <Tooltip />
+                      <Legend />
+                      <Bar dataKey="y" fill="#8884d8" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+                <button onClick={onDelete} className="delete-button">
+                  Delete
+                </button>
               </div>
-              <button onClick={onDelete}>
-                Delete
-              </button>
-            </div>
-          </Draggable>
-        );
-      }}
-    </LatestDataComponent>
+            );
+          }}
+        </LatestDataComponent>
+      </div>
+    </Draggable>
   );
 };
 

@@ -1,5 +1,5 @@
 /* General container for the Chart */
-.chart-container {
+.chart-container, .bar-chart-container {
     display: flex;
     flex-direction: column;
     background-color: #2a2a2a;
@@ -9,71 +9,76 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     color: white;
     font-family: 'Arial', sans-serif;
-  }
-  
-  /* Header and current value container */
-  .header-container {
+    border: 1px solid #444; /* Ensure both have the same border */
+}
+
+/* Header and current value container */
+.header-container {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 10px;
-  }
-  
-  .chart-header-title {
+    background-color: #333; /* Consistent header background */
+    padding: 10px;
+    border-radius: 4px 4px 0 0;
+}
+
+.chart-header-title {
     font-size: 20px;
     font-weight: bold;
-  }
-  
-  .current-value {
+    color: #f8f9fa;
+}
+
+.current-value {
     font-size: 32px;
     font-weight: bold;
     color: #28a745;
-  }
-  
-  /* Styling for the data details */
-  .data-details {
+}
+
+/* Styling for the data details */
+.data-details {
     font-size: 14px;
     color: #ccc;
     margin-bottom: 10px;
-  }
-  
-  .data-details strong {
+}
+
+.data-details strong {
     color: #f8f9fa;
-  }
-  
-  /* Styling for the range selection and spike detection */
-  .y-axis-range-component {
+}
+
+/* Styling for the range selection and spike detection */
+.y-axis-range-component {
     background-color: #333;
     padding: 10px;
     border-radius: 4px;
     margin-bottom: 15px;
-  }
-  
-  .range-slider,
-  .points-slider {
+}
+
+.range-slider,
+.points-slider {
     margin-top: 10px;
-  }
-  
-  .spike-detection {
+}
+
+.spike-detection {
     background-color: #444;
     padding: 10px;
     border-radius: 4px;
     color: #ffbaba;
     margin-bottom: 15px;
-  }
-  
-  /* Custom scroll styling */
-  .chart-scrollable {
+}
+
+/* Custom scroll styling */
+.chart-scrollable, .bar-chart-scrollable {
     overflow: hidden;
     cursor: grab;
-  }
-  
-  .chart-scrollable:active {
+}
+
+.chart-scrollable:active, .bar-chart-scrollable:active {
     cursor: grabbing;
-  }
-  
-  /* Button styling */
-  .chart-container .delete-button {
+}
+
+/* Button styling */
+.chart-container .delete-button, .bar-chart-container .delete-button {
     background-color: #dc3545;
     color: white;
     border: none;
@@ -82,25 +87,27 @@
     cursor: pointer;
     border-radius: 4px;
     transition: background-color 0.3s ease;
-  }
-  
-  .chart-container .delete-button:hover {
+    width: 100%; /* Ensure full width for both */
+    text-align: center;
+}
+
+.chart-container .delete-button:hover, .bar-chart-container .delete-button:hover {
     background-color: #c82333;
-  }
-  
-  /* Resizing and Draggable styling */
-  .react-draggable {
+}
+
+/* Resizing and Draggable styling */
+.react-draggable {
     position: relative;
-  }
-  
-  .resizable-box {
+}
+
+.resizable-box {
     border-radius: 8px;
     overflow: hidden;
     background-color: #3b3b3b;
     border: 1px solid #444;
-  }
-  
-  .resizable-box .react-resizable-handle {
+}
+
+.resizable-box .react-resizable-handle {
     position: absolute;
     width: 20px;
     height: 20px;
@@ -108,15 +115,21 @@
     bottom: 0;
     right: 0;
     cursor: se-resize;
-  }
-  
-  /* Tooltip and Legend styling */
-  .recharts-default-tooltip {
+}
+
+/* Tooltip and Legend styling */
+.recharts-default-tooltip {
     background-color: #333 !important;
     border: 1px solid #555 !important;
-  }
-  
-  .recharts-legend-item text {
+}
+
+.recharts-legend-item text {
     fill: #ccc !important;
-  }
-  
+}
+
+.no-select {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}

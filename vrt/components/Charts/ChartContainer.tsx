@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import Draggable from 'react-draggable';
 import LatestDataComponent from '../Data/LatestDataComponent';
 import ChartComponent from './common/ChartComponent';
 import Header from './common/Header';
 import YAxisRangeComponent from './common/YAxisRangeComponent';
 import { ChartContainerProps } from './types/chartComponentTypes';
-import './ChartContainer.css'; // Import the CSS file
+import './ChartContainer.css';
 
 const ChartContainer: React.FC<ChartContainerProps> = ({
   dataType,
@@ -18,6 +19,8 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
   const [yAxisRange, setYAxisRange] = useState<{ min: number; max: number }>({ min: 0, max: 100 });
   const [offset, setOffset] = useState<number>(0);
   const [currentDataType, setCurrentDataType] = useState<string>(dataType);
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [startX, setStartX] = useState<number | null>(null);
 
   useEffect(() => {
     if (currentDataType !== dataType) {
@@ -27,7 +30,6 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
   }, [dataType, currentDataType]);
 
   const handleRangeChange = (filteredData: { x: string, y: number }[], min: number, max: number) => {
-    // Ensure correct ordering of min and max
     const orderedMin = Math.min(min, max);
     const orderedMax = Math.max(min, max);
     setYAxisRange({ min: orderedMin, max: orderedMax });
@@ -45,52 +47,80 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
     });
   };
 
+  // Define the handleDataPointsChange function
   const handleDataPointsChange = (newDataPoints: number) => {
     setDataPoints(newDataPoints);
   };
 
+  const handleChartMouseDown = (event: React.MouseEvent) => {
+    setIsDragging(true);
+    setStartX(event.clientX);
+    document.body.classList.add('no-select'); // Add the no-select class
+  };
+
+  const handleChartMouseMove = (event: React.MouseEvent) => {
+    if (isDragging && startX !== null) {
+      const deltaX = event.clientX - startX;
+      if (Math.abs(deltaX) > 50) {
+        const direction = deltaX > 0 ? 'right' : 'left';
+        handleDrag(direction);
+        setStartX(event.clientX);
+      }
+    }
+  };
+
+  const handleChartMouseUp = () => {
+    setIsDragging(false);
+    setStartX(null);
+    document.body.classList.remove('no-select'); // Remove the no-select class
+  };
+
   return (
-    <LatestDataComponent dataType={dataType}>
-      {(historicalData, liveData) => {
-        const combinedData = [
-          ...historicalData.map(d => ({ x: d.timestamp, y: d.value, type: 'historical' })),
-          ...liveData.map(d => ({ x: d.timestamp, y: d.value, type: 'live' })),
-        ];
+    <Draggable handle=".header-container">
+      <div className="chart-container">
+        <LatestDataComponent dataType={dataType}>
+          {(historicalData, liveData) => {
+            const combinedData = [
+              ...historicalData.map(d => ({ x: d.timestamp, y: d.value, type: 'historical' })),
+              ...liveData.map(d => ({ x: d.timestamp, y: d.value, type: 'live' })),
+            ];
 
-        const start = Math.max(0, combinedData.length - dataPoints - offset);
-        const end = Math.max(0, combinedData.length - offset);
-        const visibleData = combinedData.slice(start, end);
+            const start = Math.max(0, combinedData.length - dataPoints - offset);
+            const end = Math.max(0, combinedData.length - offset);
+            const visibleData = combinedData.slice(start, end);
 
-        return (
-          <div className="chart-container">
-            <div className="header-container">
-              <Header
-                title={title}
-                dataType={dataType}
-                onDataTypeChange={(newDataType) => {
-                  setDisplayData([]);
-                  onDataTypeChange(newDataType);
-                }}
-                availableDataTypes={availableDataTypes}
-                dataPoints={dataPoints}
-                onDataPointsChange={handleDataPointsChange}
-                currentValue={visibleData.length ? visibleData[visibleData.length - 1].y : 0}
-              />
-            </div>
-            <YAxisRangeComponent
-              data={visibleData}
-              displayDataPoints={dataPoints}
-              onRangeChange={handleRangeChange}
-              onSpikeDetected={handleSpikeDetected}
-            />
-            <ChartComponent displayData={displayData} yAxisRange={yAxisRange} onDrag={handleDrag} />
-            <button onClick={onDelete} className="delete-button">
-              Delete
-            </button>
-          </div>
-        );
-      }}
-    </LatestDataComponent>
+            return (
+              <>
+                <div className="header-container">
+                  <Header
+                    title={title}
+                    dataType={dataType}
+                    onDataTypeChange={(newDataType) => {
+                      setDisplayData([]);
+                      onDataTypeChange(newDataType);
+                    }}
+                    availableDataTypes={availableDataTypes}
+                    dataPoints={dataPoints}
+                    onDataPointsChange={handleDataPointsChange} // Use the defined function here
+                    currentValue={visibleData.length ? visibleData[visibleData.length - 1].y : 0}
+                  />
+                </div>
+                <YAxisRangeComponent
+                  data={visibleData}
+                  displayDataPoints={dataPoints}
+                  onRangeChange={handleRangeChange}
+                  onSpikeDetected={handleSpikeDetected}
+                />
+                <ChartComponent displayData={displayData} yAxisRange={yAxisRange} onDrag={handleDrag} />
+                <button onClick={onDelete} className="delete-button">
+                  Delete
+                </button>
+              </>
+            );
+          }}
+        </LatestDataComponent>
+      </div>
+    </Draggable>
   );
 };
 

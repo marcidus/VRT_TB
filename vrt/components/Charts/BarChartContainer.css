@@ -1,5 +1,5 @@
-/* General container for the BarChart */
-.bar-chart-container {
+/* General container for the Chart */
+.chart-container, .bar-chart-container {
     display: flex;
     flex-direction: column;
     background-color: #2a2a2a;
@@ -9,6 +9,7 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     color: white;
     font-family: 'Arial', sans-serif;
+    border: 1px solid #444; /* Ensure both have the same border */
 }
 
 /* Header and current value container */
@@ -17,11 +18,15 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 10px;
+    background-color: #333; /* Consistent header background */
+    padding: 10px;
+    border-radius: 4px 4px 0 0;
 }
 
 .chart-header-title {
     font-size: 20px;
     font-weight: bold;
+    color: #f8f9fa;
 }
 
 .current-value {
@@ -63,17 +68,17 @@
 }
 
 /* Custom scroll styling */
-.bar-chart-scrollable {
+.chart-scrollable, .bar-chart-scrollable {
     overflow: hidden;
     cursor: grab;
 }
 
-.bar-chart-scrollable:active {
+.chart-scrollable:active, .bar-chart-scrollable:active {
     cursor: grabbing;
 }
 
 /* Button styling */
-.bar-chart-container .delete-button {
+.chart-container .delete-button, .bar-chart-container .delete-button {
     background-color: #dc3545;
     color: white;
     border: none;
@@ -82,9 +87,11 @@
     cursor: pointer;
     border-radius: 4px;
     transition: background-color 0.3s ease;
+    width: 100%; /* Ensure full width for both */
+    text-align: center;
 }
 
-.bar-chart-container .delete-button:hover {
+.chart-container .delete-button:hover, .bar-chart-container .delete-button:hover {
     background-color: #c82333;
 }
 
@@ -118,4 +125,11 @@
 
 .recharts-legend-item text {
     fill: #ccc !important;
+}
+
+.no-select {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
