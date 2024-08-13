@@ -1,0 +1,36 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Koulen&family=Lato&family=Nunito&family=Playfair+Display:ital@1&family=Prata&family=Raleway:ital,wght@1,100&family=Roboto&family=Roboto+Condensed&family=Teko&display=swap');
+
+.map {
+  width: 600px;
+  height: 400px;
+  background: transparent;
+}
+
+.mapDiv {
+  width: 600px;
+  height: 400px;
+  background: transparent;
+}
+
+.map-container {
+  width: 600px;
+}
+
+
+.leaflet-bottom {
+  display: none;
+}
+
+
+input[type="file"] {
+  display: none;
+}
+
+
+.btn:hover {
+
+  background: linear-gradient(90deg, #787878 0%, #000000 100%);
+  color: #d9d9d9;
+  border: none;
+}
+
