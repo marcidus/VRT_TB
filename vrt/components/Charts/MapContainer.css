@@ -1,0 +1,22 @@
+.map-container{
+    position: relative;
+    border: 2px solid #4a4a4a;
+    border-radius: 8px;
+    background-color: #333;
+    color: white;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+    cursor: grab; /* Added to indicate draggable behavior */
+}
+.handle-bar {
+    background-color: #555;
+    color: white;
+    padding: 5px;
+    cursor: move;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    z-index: 2; /* Ensure handle bar is on top */
+}

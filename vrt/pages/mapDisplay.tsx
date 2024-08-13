@@ -6,7 +6,7 @@ import dynamic from 'next/dynamic';
 export default function MapDisplay() {
 
     const Map = useMemo(() => dynamic(
-        () => import('../components/MapComponent'),
+        () => import('../components/Charts/common/MapComponent'),
         { 
           loading: () => <p>A map is loading</p>,
           ssr: false
@@ -15,7 +15,6 @@ export default function MapDisplay() {
 
     return (
         <div>
-            <h1>Map</h1>
              <Map/>
         </div>
     );

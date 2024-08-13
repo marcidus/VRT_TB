@@ -55,3 +55,9 @@ export interface BarChartContainerProps {
   availableDataTypes: string[];
   onDelete: () => void;
 }
+
+export interface MapContainerProps {
+  title: string;
+  onDelete: () => void;
+  onPositionChange: (x: number, y: number) => void;
+}

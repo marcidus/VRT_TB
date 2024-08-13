@@ -3,7 +3,7 @@ import "leaflet/dist/leaflet.css";
 import "leaflet-defaulticon-compatibility"
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css"
 import { MapContainer, TileLayer, useMap, Polyline, Marker } from 'react-leaflet'
-import "../styles/map.css"
+import "../../../styles/map.css"
 import L from 'leaflet'
 import html2canvas from 'html2canvas';
 import "leaflet-control-geocoder/dist/Control.Geocoder.css";
@@ -19,7 +19,7 @@ import { NotificationContainer, NotificationManager } from 'react-notifications'
 import 'react-notifications/lib/notifications.css';
 
 
-export default function MapComponent(props: any) {
+export default function MapComponent(props: any){
   const [polylinePoints, setPolylinePoints] = useState<L.LatLng[]>([]);
   const [center, setCenter] = useState<L.LatLng>(L.latLng(46.174764452886265, 7.223735237766073));
   const [mapBounds, setMapBounds] = useState<L.LatLngBounds>();

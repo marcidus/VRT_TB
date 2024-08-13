@@ -7,8 +7,9 @@ import Draggable, { DraggableEvent, DraggableData } from 'react-draggable';
 import { ResizableBox, ResizeCallbackData } from 'react-resizable';
 import HeaderToggleButton from './HeaderToggleButton';
 import 'react-resizable/css/styles.css';
-import { CarDataItem, ChartItem, DashboardItem } from './DashboardItemTypes';
+import { CarDataItem, ChartItem, DashboardItem, MapItem } from './DashboardItemTypes';
 import DashboardTemplates from './DashboardTemplates';
+import MapContainer from '../Charts/MapContainer';
 
 // Props for the GridLayoutComponent
 interface GridLayoutComponentProps {
@@ -84,7 +85,7 @@ const GridLayoutComponent: React.FC<GridLayoutComponentProps> = ({ charts: initi
     onUpdateCharts(newCharts);
   };
 
-  const handleAddChart = (title: string, dataType: string, chartType: 'line' | 'bar' | 'car') => {
+  const handleAddChart = (title: string, dataType: string, chartType: 'line' | 'bar' | 'car' | 'map') => {
     let newItem: DashboardItem;
     if (chartType === 'car') {
       newItem = {
@@ -103,6 +104,16 @@ const GridLayoutComponent: React.FC<GridLayoutComponentProps> = ({ charts: initi
         Right_Back_Wheel: availableDataTypes[0],
         Battery: availableDataTypes[0],
       }));
+    }
+      else if (chartType === 'map') {
+        newItem = {
+          id: (charts.length + 1).toString(),
+          type: 'map',
+          x: 0,
+          y: 0,
+          width: 700,
+          height: 300,
+        } as MapItem;
     } else {
       newItem = {
         id: (charts.length + 1).toString(),
@@ -248,6 +259,18 @@ const GridLayoutComponent: React.FC<GridLayoutComponentProps> = ({ charts: initi
                   availableDataTypes={availableDataTypes}
                   onDataTypeChange={handleCarDataTypeChange}
                   selectedDataTypes={selectedDataTypes}
+                  onPositionChange={(x, y) => {
+                    const newCharts = [...charts];
+                    newCharts[index].x = x;
+                    newCharts[index].y = y;
+                    setCharts(newCharts);
+                    onUpdateCharts(newCharts);
+                  }}
+                />
+              )}
+              {'type' in item && item.type === 'map' && (
+                <MapContainer
+                  onDelete={() => handleDeleteChart(index)}
                   onPositionChange={(x, y) => {
                     const newCharts = [...charts];
                     newCharts[index].x = x;

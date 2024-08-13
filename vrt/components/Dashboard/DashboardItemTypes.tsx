@@ -26,5 +26,14 @@ export interface CarDataItem {
   height: number; // Height of the item
 }
 
+export interface MapItem {
+  id: string; // Unique identifier for the map item
+  type: 'map'; // Type of the item, fixed as 'map'
+  x: number; // X-coordinate of the item's position
+  y: number; // Y-coordinate of the item's position
+  width: number; // Width of the item
+  height: number; // Height of the item
+}
+
 // Union type to represent any item that can be included in the dashboard
-export type DashboardItem = ChartItem | CarDataItem;
+export type DashboardItem = ChartItem | CarDataItem | MapItem;
