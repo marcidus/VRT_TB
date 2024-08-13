@@ -1,0 +1,141 @@
+.car-data-display-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    border: 2px solid #4a4a4a;
+    border-radius: 8px;
+    background-color: #333;
+    color: white;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+    cursor: grab; /* Added to indicate draggable behavior */
+}
+
+.car-data-display-container:active {
+    cursor: grabbing; /* Changes cursor when actively dragging */
+    z-index: 1000; /* Brings the dragged component to the front */
+}
+
+.handle-bar {
+    background-color: #555;
+    color: white;
+    padding: 5px;
+    cursor: move;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    z-index: 2; /* Ensure handle bar is on top */
+}
+
+.delete-button {
+    background-color: #d9534f;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.delete-button:hover {
+    background-color: #c9302c;
+}
+
+.add-label-button {
+    background-color: #0275d8;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 14px;
+    margin: 10px 0;
+}
+
+.add-label-button:hover {
+    background-color: #025aa5;
+}
+
+.car-image-container {
+    position: relative;
+    width: 100%;
+    height: calc(100% - 40px);
+    z-index: 1; /* Ensure image container stays behind labels */
+}
+
+.car-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.data-label {
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 4px;
+    border-radius: 4px;
+    transform: translate(-50%, -50%);
+    cursor: grab;
+    z-index: 2;
+    max-width: 200px;
+    font-size: 12px;
+}
+
+.data-label:active {
+    cursor: grabbing;
+    z-index: 1000; /* Brings the dragged label to the front */
+}
+
+.label-input {
+    background-color: white;
+    border: 1px solid gray;
+    border-radius: 4px;
+    width: 100px;
+    margin-left: 5px;
+    padding: 2px 5px;
+    font-size: 12px;
+    color: black;
+}
+
+.label-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.delete-label-button {
+    background: none;
+    border: none;
+    color: #d9534f;
+    cursor: pointer;
+    margin-left: 5px;
+}
+
+.delete-label-button:hover {
+    color: #c9302c;
+}
+
+.data-select {
+    width: 100px;
+    margin-bottom: 5px;
+    background-color: white;
+    border: 1px solid gray;
+    border-radius: 4px;
+    padding: 2px 5px;
+    color: black;
+}
+
+.data-select option {
+    background-color: white;
+    color: black;
+}
+
+.data-value {
+    color: #000;
+    font-weight: bold;
+}

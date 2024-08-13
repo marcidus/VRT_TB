@@ -1,13 +1,18 @@
-import React from 'react';
-import GridLayoutComponent from '../components/GridLayoutComponent';
-import ExampleComponent from '../components/ExampleComponent';
+import React, { useState } from 'react';
+import DashboardManager from '../components/Dashboard/DashboardManager';
+import './dashboard.css';
 
 const Dashboard: React.FC = () => {
+  const [title, setTitle] = useState<string>('Dashboard');
+
+  const handleTitleChange = (newTitle: string) => {
+    setTitle(newTitle);
+  };
+
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
-      <GridLayoutComponent />
-      <ExampleComponent />
+    <div className="dashboard-container">
+      <h1>{title}</h1>
+      <DashboardManager onTitleChange={handleTitleChange} />
     </div>
   );
 };

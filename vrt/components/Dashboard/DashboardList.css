@@ -1,0 +1,200 @@
+/* Styling for the bottom bar container */
+.dashboard-list {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #2a2a2a;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    transition: max-height 0.3s ease;
+    cursor: pointer;
+}
+
+.dashboard-list.expanded {
+    max-height: 300px;
+}
+
+.dashboard-list.collapsed {
+    max-height: 40px;
+}
+
+/* Header for the toggle button */
+.dashboard-list-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 0;
+}
+
+/* Toggle button styling */
+.toggle-button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 14px;
+    transition: color 0.3s ease;
+}
+
+/* Group tabs container */
+.group-tabs {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 5px 10px;
+    overflow-x: auto;
+}
+
+/* Individual group tab styling */
+.group-tab {
+    display: flex;
+    align-items: center;
+    padding: 5px 10px;
+    background-color: #3b3b3b;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 10px;
+    transition: background-color 0.3s ease;
+    position: relative;
+}
+
+.group-tab.active {
+    background-color: #007bff;
+}
+
+.group-tab span {
+    margin-right: 5px;
+}
+
+/* Edit and delete icons for group tabs */
+.edit-group-icon, .delete-group-icon {
+    margin-left: 5px;
+    color: #ccc;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.edit-group-icon:hover, .delete-group-icon:hover {
+    color: #fff;
+}
+
+/* Add Group button */
+.add-group-button {
+    background-color: #28a745;
+    color: white;
+    padding: 5px 10px;
+    font-size: 14px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.add-group-button:hover {
+    background-color: #218838;
+}
+
+/* Styling for dashboard items and dashboard groups */
+.dashboard-group {
+    padding: 10px;
+    max-height: 160px; /* Limit the height to enable scrolling */
+    overflow-y: auto; /* Enable vertical scrolling */
+}
+
+.dashboard-group-title {
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+.dashboard-items-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    overflow-x: auto;
+}
+
+/* Custom scrollbar styling */
+.dashboard-group::-webkit-scrollbar {
+    width: 8px;
+}
+
+.dashboard-group::-webkit-scrollbar-thumb {
+    background-color: #3b3b3b;
+    border-radius: 4px;
+}
+
+.dashboard-group::-webkit-scrollbar-track {
+    background: #2a2a2a;
+}
+
+.dashboard-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    background-color: #3b3b3b;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    min-width: 150px;
+}
+
+.dashboard-item.selected {
+    background-color: #007bff;
+}
+
+.dashboard-name {
+    flex-grow: 1;
+    background: none;
+    border: none;
+    color: #ffffff;
+    font-size: 14px;
+    outline: none;
+    padding-right: 10px;
+}
+
+.delete-button {
+    background-color: transparent;
+    color: #ffffff;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    border-radius: 50%;
+    padding: 4px;
+}
+
+.delete-button:hover {
+    background-color: #ffffff;
+    color: #dc3545;
+}
+
+.add-dashboard-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #28a745;
+    color: white;
+    padding: 10px;
+    font-size: 14px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 100%;
+}
+
+.add-dashboard-button:hover {
+    background-color: #218838;
+}
+
+.add-dashboard-button svg {
+    margin-right: 8px;
+}

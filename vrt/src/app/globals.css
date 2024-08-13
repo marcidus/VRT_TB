@@ -26,8 +26,74 @@ body {
     rgb(var(--background-start-rgb));
 }
 
+.handle-bar {
+  height: 8px;
+  background-color: #4a5568; /* Tailwind gray-600 */
+  cursor: move;
+  border-top-left-radius: 0.5rem; /* Tailwind rounded-t */
+  border-top-right-radius: 0.5rem; /* Tailwind rounded-t */
+}
+
+.header {
+  background-color: #2d3748; /* Tailwind gray-800 */
+  padding: 1rem; /* Tailwind p-4 */
+  border-top-left-radius: 0.5rem; /* Tailwind rounded-t */
+  border-top-right-radius: 0.5rem; /* Tailwind rounded-t */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header h2 {
+  font-size: 1.125rem; /* Tailwind text-lg */
+  font-weight: 600; /* Tailwind font-semibold */
+  color: #fff; /* Tailwind text-white */
+}
+
+.header select {
+  margin-left: 0.5rem; /* Tailwind ml-2 */
+  background-color: #fff; /* Tailwind bg-white */
+  border: 1px solid #cbd5e0; /* Tailwind border-gray-300 */
+  border-radius: 0.25rem; /* Tailwind rounded */
+}
+
+.header label {
+  margin-left: 1rem; /* Tailwind ml-4 */
+  color: #fff; /* Tailwind text-white */
+}
+
+.header input[type="range"] {
+  margin-left: 0.5rem; /* Tailwind ml-2 */
+}
+
+.header span {
+  margin-left: 0.5rem; /* Tailwind ml-2 */
+  color: #fff; /* Tailwind text-white */
+}
+
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  .recharts-brush {
+    @apply z-10; /* Ensure the Brush component has a higher z-index */
+  }
+
+  .react-grid-item {
+    @apply z-1; /* Ensure the draggable items have a lower z-index */
+  }
+
+  .react-grid-layout {
+    pointer-events: none; /* Disables pointer events for the grid layout while dragging */
+  }
+
+  .react-grid-item {
+    pointer-events: auto; /* Enables pointer events for the grid items */
+  }
+
+  .recharts-wrapper {
+    pointer-events: auto; /* Ensures the chart components respond to pointer events */
   }
 }

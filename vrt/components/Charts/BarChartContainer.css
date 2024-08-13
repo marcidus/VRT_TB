@@ -1,0 +1,124 @@
+.bar-chart-container {
+    display: flex;
+    flex-direction: column;
+    background-color: #2a2a2a;
+    border-radius: 8px;
+    overflow: hidden;
+    padding: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    color: white;
+    font-family: 'Arial', sans-serif;
+    border: 1px solid #444;
+    cursor: grab; /* Added to indicate draggable behavior */
+}
+
+.bar-chart-container:active {
+    cursor: grabbing; /* Changes cursor when actively dragging */
+    z-index: 1000; /* Brings the dragged component to the front */
+}
+
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    background-color: #333;
+    padding: 10px;
+    border-radius: 4px 4px 0 0;
+    z-index: 2; /* Ensure header is on top */
+}
+
+.chart-header-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #f8f9fa;
+}
+
+.current-value {
+    font-size: 32px;
+    font-weight: bold;
+    color: #28a745;
+}
+
+.y-axis-range-component {
+    background-color: #333;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+}
+
+.range-slider,
+.points-slider {
+    margin-top: 10px;
+}
+
+.spike-detection {
+    background-color: #444;
+    padding: 10px;
+    border-radius: 4px;
+    color: #ffbaba;
+    margin-bottom: 15px;
+}
+
+.bar-chart-scrollable {
+    overflow: hidden;
+    cursor: grab;
+}
+
+.bar-chart-scrollable:active {
+    cursor: grabbing;
+}
+
+.bar-chart-container .delete-button {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    margin-top: 10px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+    width: 100%;
+    text-align: center;
+}
+
+.bar-chart-container .delete-button:hover {
+    background-color: #c82333;
+}
+
+.react-draggable {
+    position: relative;
+}
+
+.resizable-box {
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #3b3b3b;
+    border: 1px solid #444;
+}
+
+.resizable-box .react-resizable-handle {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: #007bff;
+    bottom: 0;
+    right: 0;
+    cursor: se-resize;
+}
+
+.recharts-default-tooltip {
+    background-color: #333 !important;
+    border: 1px solid #555 !important;
+}
+
+.recharts-legend-item text {
+    fill: #ccc !important;
+}
+
+.no-select {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
