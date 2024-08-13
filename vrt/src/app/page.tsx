@@ -33,6 +33,10 @@ export default function Home() {
           Go to Dashboard
         </a>
       </div>
+      <div className="p-4">
+        <h1 className="text-2xl font-bold mb-4">Welcome to My Dashboard App</h1>
+        <a href="/mapDisplay" className="text-blue-500">Go to Map Display</a>
+      </div>
     </main>
   );
 }
